@@ -1,10 +1,12 @@
 import { get_user, add_cloves, subtract_cloves } from "../user_utils.js";
-import { emote_map } from "../interactions.js";
+import config from "../config.json" with { type: "json" };
+
+const { emote_map } = config;
 
 class TicTacToe {
-    constructor(id1, id2) {
+    constructor(id1, bet) {
         this.player1_id = id1;
-        this.player2_id = id2;
+        this.bet = bet;
     }
 
     async start() {
@@ -14,12 +16,12 @@ class TicTacToe {
 
         const symbol_random = Math.random();
         if (symbol_random > 0.5) {
-            this.id_to_symbol = { [this.player1_id]: "o", [this.player2_id]: "x" };
-            this.symbol_to_id = { "o": this.player1_id, "x": this.player2_id };
+            this.id_to_symbol = { [this.player1_id]: "⭕", [this.player2_id]: "❌" };
+            this.symbol_to_id = { "⭕": this.player1_id, "❌": this.player2_id };
         }
         else {
-            this.id_to_symbol = { [this.player1_id]: "x", [this.player2_id]: "o" };
-            this.symbol_to_id = { "x": this.player1_id, "o": this.player2_id };
+            this.id_to_symbol = { [this.player1_id]: "❌", [this.player2_id]: "⭕" };
+            this.symbol_to_id = { "❌": this.player1_id, "⭕": this.player2_id };
         }
 
         this.board = [["", "", ""], ["", "", ""], ["", "", ""]];
@@ -28,7 +30,21 @@ class TicTacToe {
         this.ended = false;
     }
 
-    place_mark(id, position) {
+    async place_mark(id, position) {
+        // const session = await mongoose.startSession();
+
+        // try {
+
+        // }
+        // catch (err) {
+        //     await session.abortTransaction();
+        // return {success: false, message: `Some stoopid error occured ${emote_map.crying}`};
+        // }
+        // finally {
+        //     session.endSession();
+        // }
+        // session.startTransaction();
+
         if (this.turn !== id) {
             return {success: false, message: `It's not your turn ${emote_map.peek}`};
         }
@@ -41,7 +57,13 @@ class TicTacToe {
         this.board[row][col] = this.id_to_symbol[id];
         this.turn = (this.turn === this.player1_id) ? this.player2_id : this.player1_id;
 
-        if (this.check_win()) return {success: true, winner: this.winner, board: this.board};
+        if (this.check_win()) {
+            if (this.bet !== null) {
+                await add_cloves(this.winner, this.bet);
+                await subtract_cloves(this.winner === this.player1_id ? this.player1_id : this.player2_id, this.bet);
+            }
+            return {success: true, winner: this.winner, board: this.board};
+        }
         if (this.check_draw()) return {success: true, draw: true, board: this.board};
 
         return {success: true, board: this.board};

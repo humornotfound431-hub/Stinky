@@ -2,20 +2,10 @@ import { configDotenv } from 'dotenv';
 import mongoose from 'mongoose';
 import { add_cloves, subtract_cloves, get_user } from "./user_utils.js";
 import { MessageFlags, EmbedBuilder } from "discord.js";
+import config from './config.json' with { type: 'json' };
 
+const { emote_map, colors } = config;
 configDotenv();
-
-const RED = 0xE57373;
-const GARLIC = 0xC5E1A5;
-
-const emote_map = {
-    crying: "<:crying:1493445299815845958>",
-    smug: "<:smug:1493445462081142976>",
-    SmugGarlic: "<:SmugGarlic:1487998783924076754>",
-    heart_1: "<:heart_1:1493445209537777684>",
-    peek: "<:peek:1493445431869313194>",
-    bigbrain: "<:bigbrain:1496294871416438895>"
-};
 
 const roulette_state = {
     active: false,
@@ -287,7 +277,6 @@ const donate_cloves = async (user_id, target_id, user_name, target_name, amount)
     }
     catch (err) {
         await session.abortTransaction();
-        throw err;
         return {success: false, message: `Some stoopid error occured ${emote_map.crying}`};
     }
     finally {
@@ -295,7 +284,9 @@ const donate_cloves = async (user_id, target_id, user_name, target_name, amount)
     }
 };
 
-const COLORS = {RED, GARLIC};
+const check_daily = async () => {
+
+};
 
 export {
     get_jokes,
@@ -303,6 +294,5 @@ export {
     get_cloves,
     donate_cloves,
     play_slots,
-    COLORS,
-    emote_map
+    check_daily
 };

@@ -7,7 +7,7 @@ const commands = [
     new SlashCommandBuilder()
         .setName('ping')
         .setDescription('Replies with pong'),
-
+    
     new SlashCommandBuilder()
         .setName('random_joke')
         .setDescription('Gives a random joke'),
@@ -72,26 +72,18 @@ const commands = [
             sub
                 .setName("start")
                 .setDescription("Start a new game")
-                .addUserOption(option =>
+                .addIntegerOption(option =>
                     option
-                        .setName("opponent")
-                        .setDescription("User to play against")
-                        .setRequired(true)
+                        .setName("amount")
+                        .setDescription("Amount of cloves to bet")
+                        .setMinValue(1)
                 )
         )
 
-        .addSubcommand(sub =>
+        .addSubcommand(sub => 
             sub
-                .setName("move")
-                .setDescription("Make a move")
-                .addIntegerOption(option =>
-                    option
-                        .setName("position")
-                        .setDescription("Position (1-9)")
-                        .setRequired(true)
-                        .setMinValue(1)
-                        .setMaxValue(9)
-                )
+                .setName("join")
+                .setDescription("Join a game")
         )
 
         .addSubcommand(sub =>

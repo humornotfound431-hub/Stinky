@@ -1,12 +1,23 @@
 import { configDotenv } from 'dotenv';
-import { Client, GatewayIntentBits, EmbedBuilder, MessageFlags } from 'discord.js';
+
+import {
+    Client,
+    GatewayIntentBits,
+    EmbedBuilder,
+    MessageFlags,
+    ActionRowBuilder,
+    ButtonBuilder,
+    ButtonStyle 
+} from 'discord.js';
+
 import mongoose from 'mongoose';
 
-import { get_jokes, place_bet, get_cloves, donate_cloves, play_slots, COLORS } from './interactions.js';
+import { get_jokes, place_bet, get_cloves, donate_cloves, play_slots, check_daily } from './interactions.js';
 import TicTacToe from './games/tictactoe.js';
+import config from './config.json' with { type: 'json' };
 
 configDotenv();
-
+const { channels, emote_map, colors } = config;
 // Test server
 // 1488407905580351598 :: Text channels
 
@@ -14,7 +25,6 @@ configDotenv();
 // 1487876883373883432 :: Community
 // 1498159882359279778 :: Clove Casino
 // 1488042622470852709 :: Mod/Admin
-const channels = ["1498159882359279778:gaming", "1498159882359279778:garlic-gambling", "1488042622470852709:bot-setup", "1488407905580351598:general"];
 const cmd_channel_perms = new Map([
     ["ping", new Set([channels[0], channels[1], channels[2], channels[3]])],
     ["random_joke", new Set(channels)],
@@ -49,14 +59,86 @@ client.once('clientReady', () => {
 let currentGame;
 function renderBoard(board) {
     return board.map(row =>
-        row.map(cell => cell === "" ? "⬜" : (cell === "x" ? "❌" : "⭕")).join(" ")
+        row.map(cell => cell === "" ? "⬛" : (cell === "x" ? "❌" : "⭕")).join(" ")
     ).join("\n");
 }
 
 client.on('interactionCreate', async (interaction) => {
-    if (!interaction.isChatInputCommand()) return;
-
     try {
+        if (interaction.isButton()) {
+            const [type, id] = interaction.customId.split(":");
+            switch (type) {
+                case "tic-tac-toe":
+                    if (!currentGame) {
+                        return await interaction.reply({
+                            embeds: [{
+                                title: `No game running right now ${emote_map.sweat_1}`,
+                                color: colors["RED"]
+                            }],
+
+                            flags: MessageFlags.Ephemeral
+                        });
+                    }
+                    
+                    const {success, message, winner, draw, board} = await currentGame.place_mark(interaction.user.id, Number(id));
+
+                    if (!success) {
+                        return await interaction.reply({
+                            embeds: [{
+                                title: message,
+                                color: colors["RED"]
+                            }],
+
+                            flags: MessageFlags.Ephemeral
+                        });
+                    }
+
+                    let buttons = [];
+                    for (let row_index = 0; row_index < currentGame.board.length; row_index++) {
+                        buttons.push(new ActionRowBuilder().addComponents(...currentGame.board[row_index].map((cell, cell_index) => {
+                            return new ButtonBuilder()
+                                .setCustomId(`tic-tac-toe:${(row_index * 3) + cell_index + 1}`)
+                                .setLabel(currentGame.board[row_index][cell_index] || "\u200b")
+                                .setStyle(ButtonStyle.Secondary)
+                        })));
+                    }
+                    
+                    let desc = "";
+                    const msg = currentGame.msg;
+                    if (winner) {
+                        desc += `\n\n🏆 Winner: <@${winner}>`;
+                        currentGame = null;
+                    } else if (draw) {
+                        desc += `\n\n🤝 Draw`;
+                        currentGame = null;
+                    }
+                    else {
+                        desc = `<@${currentGame.player1_id}>: ${currentGame.id_to_symbol[currentGame.player1_id]}\n` +
+                                `<@${currentGame.player2_id}>: ${currentGame.id_to_symbol[currentGame.player2_id]}\n\n` +
+                                `**Turn:** <@${currentGame.turn}>\n\n`;
+                    }
+
+                    await msg.edit({
+                        embeds: [{
+                            title: "Tic Tac Toe",
+                            description: desc,
+                            color: colors["GARLIC"],
+                        }],
+
+                        components: buttons
+                    });
+                    break;
+            }
+
+            return await interaction.reply({
+                embeds: [{
+                    title: "You made a move yay",
+                    color: colors["GARLIC"]
+                }],
+                flags: MessageFlags.Ephemeral
+            });
+        }
+
         const name = interaction.member?.displayName || interaction.user.globalName || interaction.user.username;
 
         if (!cmd_channel_perms.get(interaction.commandName).has(`${interaction.channel.parent.id}:${interaction.channel.name}`)) {
@@ -66,8 +148,11 @@ client.on('interactionCreate', async (interaction) => {
         }
 
         if (interaction.commandName === "ping") {
+            await interaction.editReply({ content: "pong", flags: MessageFlags.Ephemeral });
+        }
+        else if (interaction.commandName === "daily") {
             await interaction.deferReply({ flags: MessageFlags.Ephemeral });
-            await interaction.editReply({ content: "pong" });
+            const {success, message, last_daily} = check_daily()
         }
         else if (interaction.commandName === "random_joke") {
             await interaction.deferReply();
@@ -84,7 +169,7 @@ client.on('interactionCreate', async (interaction) => {
             const {success, message} = await place_bet(amount, choice, channel, name, interaction.user.id);
             const embed_bet = new EmbedBuilder()
                 .setTitle(message)
-                .setColor((success) ? COLORS.GARLIC : COLORS.RED)
+                .setColor((success) ? colors.GARLIC : colors.RED)
 
             await interaction.editReply({ embeds: [embed_bet] });
         }
@@ -97,7 +182,7 @@ client.on('interactionCreate', async (interaction) => {
             const embed_slots = new EmbedBuilder()
                 .setTitle(message)
                 .setDescription(success ? `\n${results[0]} │ ${results[1]} │ ${results[2]}` : "")
-                .setColor((success) ? COLORS.GARLIC : COLORS.RED)
+                .setColor((success) ? colors.GARLIC : colors.RED)
                 .addFields(
                     { name: "\u200B", value: " " },
                     { name: `${name}: (Bet ${amount})`, value: (success) ? String(changed) : "+0" }
@@ -110,8 +195,8 @@ client.on('interactionCreate', async (interaction) => {
             const cloves = await get_cloves(interaction.user.id);
 
             const embed_cloves = new EmbedBuilder()
-                .setTitle(`${name} has ${cloves} cloves! <:heart_1:1493445209537777684>`)
-                .setColor(COLORS.GARLIC);
+                .setTitle(`${name} has ${cloves} cloves! ${emote_map.heart_1}`)
+                .setColor(colors.GARLIC);
 
             await interaction.editReply({ embeds: [embed_cloves] });
         }
@@ -126,86 +211,117 @@ client.on('interactionCreate', async (interaction) => {
 
             const embed_donate = new EmbedBuilder()
                 .setTitle(message)
-                .setColor((success) ? COLORS.GARLIC : COLORS.RED)
+                .setColor((success) ? colors.GARLIC : colors.RED)
 
             await interaction.editReply({ embeds: [embed_donate] });
         }
         else if (interaction.commandName === "tic-tac-toe") {
-            await interaction.reply("Nope");
-            return;
-
             const sub = interaction.options.getSubcommand();
+            const channel = await client.channels.fetch(interaction.channelId);
+
             if (sub === "start") {
-                const opponent = interaction.options.getUser("opponent");
+                const amount = interaction.options.getInteger("amount") || null;
 
                 if (currentGame) {
-                    return interaction.reply("A game is already running.");
+                    return await interaction.reply({
+                        embeds: [{
+                            title: `A game is already running ${emote_map.peek}`,
+                            color: colors["RED"]
+                        }],
+
+                        flags: MessageFlags.Ephemeral
+                    });
                 }
 
-                currentGame = new TicTacToe(interaction.user.id, opponent.id);
-                const data = await currentGame.start();
+                currentGame = new TicTacToe(interaction.user.id, amount);
 
-                const boardStr = renderBoard(currentGame.board);
+                currentGame.msg = await channel.send({
+                    embeds: [{
+                        title: "Tic Tac Toe Challenge",
+                        description:
+                            `${interaction.user} started a Tic Tac Toe game ${emote_map.peek}\n\n` +
+                            `💰 **Wager:** ${currentGame.amount} cloves\n\n` +
+                            `Use \`/tic-tac-toe join\` to join the game!`,
+                        color: colors["GARLIC"],
+                    }]
+                });
 
                 await interaction.reply({
                     embeds: [{
-                        title: "Tic Tac Toe",
-                        description:
-                            `${interaction.user} vs ${opponent}\n\n` +
-                            `**${interaction.user}**: ${currentGame.id_to_symbol[interaction.user.id]}\n` +
-                            `**${opponent}**: ${currentGame.id_to_symbol[opponent.id]}\n\n` +
-                            `**Turn:** <@${currentGame.turn}>\n\n` +
-                            boardStr
-                    }]
+                        title: "Started the game",
+                        color: colors["GARLIC"]
+                    }],
+
+                    flags: MessageFlags.Ephemeral
                 });
             }
 
-            else if (sub === "move") {
+            else if (sub === "join") {
                 if (!currentGame) {
-                    return interaction.reply("No active game.");
+                    return await interaction.reply({
+                        embeds: [{
+                            title: `No game running right now ${emote_map.sweat_1}`,
+                            color: colors["RED"]
+                        }],
+
+                        flags: MessageFlags.Ephemeral
+                    });
                 }
 
-                const position = interaction.options.getInteger("position");
+                currentGame.player2_id = interaction.user.id;
+                await currentGame.start();
 
-                const result = currentGame.place_mark(interaction.user.id, position);
-
-                if (!result.success) {
-                    return interaction.reply(result.message);
+                let buttons = [];
+                for (let row_index = 0; row_index < currentGame.board.length; row_index++) {
+                    buttons.push(new ActionRowBuilder().addComponents(...currentGame.board[row_index].map((cell, cell_index) => {
+                        return new ButtonBuilder()
+                            .setCustomId(`${interaction.commandName}:${(row_index * 3) + cell_index + 1}`)
+                            .setLabel(currentGame.board[row_index][cell_index] || "\u200b")
+                            .setStyle(ButtonStyle.Secondary)
+                    })));
                 }
 
-                const boardStr = renderBoard(result.board);
+                await currentGame.msg.edit({
+                    embeds: [{
+                        title: "Tic Tac Toe",
+                        description:
+                            `<@${currentGame.player1_id}>: ${currentGame.id_to_symbol[currentGame.player1_id]}\n` +
+                            `<@${currentGame.player2_id}>: ${currentGame.id_to_symbol[currentGame.player2_id]}\n\n` +
+                            `**Turn:** <@${currentGame.turn}>\n\n`,
+                        color: colors["GARLIC"],
+                    }],
 
-                let desc = boardStr;
-
-                if (result.winner) {
-                    desc += `\n\n🏆 Winner: <@${result.winner}>`;
-                    currentGame = null;
-                } else if (result.draw) {
-                    desc += `\n\n🤝 Draw`;
-                    currentGame = null;
-                } else {
-                    desc += `\n\n**Turn:** <@${currentGame.turn}>`;
-                }
+                    components: buttons
+                });
 
                 await interaction.reply({
                     embeds: [{
-                        title: "Tic Tac Toe",
-                        description: desc
-                    }]
+                        title: "Joined the game",
+                        color: colors["GARLIC"]
+                    }],
+
+                    flags: MessageFlags.Ephemeral
                 });
             }
 
             else if (sub === "end") {
                 if (!currentGame) {
-                    return interaction.reply("No active game.");
+                    return await interaction.reply({
+                        embeds: [{
+                            title: `No game running right now ${emote_map.sweat_1}`,
+                            color: colors["RED"]
+                        }],
+
+                        flags: MessageFlags.Ephemeral
+                    });
                 }
 
                 currentGame = null;
 
                 await interaction.reply({
                     embeds: [{
-                        title: "Game Ended",
-                        description: `<@${interaction.user.id}> ended the game.`
+                        title: `${interaction.user} ended the game ${emote_map.bigbrain}`,
+                        color: colors["RED"]
                     }]
                 });
             }
@@ -213,7 +329,7 @@ client.on('interactionCreate', async (interaction) => {
         else if (interaction.commandName === "help") {
             const embed = new EmbedBuilder()
                 .setTitle("Bot Commands")
-                .setColor(COLORS.GARLIC)
+                .setColor(colors.GARLIC)
                 .addFields(
                     { name: "`/ping`", value: "Check if bot is alive", inline: false },
                     { name: "`/random_joke`", value: "Gives a random joke...don't get cringed out", inline: false },
@@ -234,7 +350,7 @@ client.on('interactionCreate', async (interaction) => {
 
         const err_embed = new EmbedBuilder()
             .setTitle(msg)
-            .setColor(COLORS.RED);
+            .setColor(colors.RED);
 
         try {
             if (interaction.deferred || interaction.replied) {
@@ -249,7 +365,8 @@ client.on('interactionCreate', async (interaction) => {
         const time = d.toLocaleTimeString("en-IN", {hour12: false});
         const date = d.toLocaleDateString('en-GB').slice(0,5);
 
-        console.log(`>> ${interaction.user.username}:${interaction.user.id} used ${interaction.commandName} :: ${time}|${date}`);
+        if (interaction.isButton()) console.log(`>> ${interaction.user.username}:${interaction.user.id} clicked ${interaction.customId} :: ${time}|${date}`); 
+        else console.log(`>> ${interaction.user.username}:${interaction.user.id} used ${interaction.commandName} :: ${time}|${date}`);
     }
 });
 
