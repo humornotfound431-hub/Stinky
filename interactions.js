@@ -134,7 +134,7 @@ const place_bet = async (amount, choice, channel, name, id) => {
             let new_roulette_embed = new EmbedBuilder()
                 .setTitle(`Roulette rolled ${roulette_state.result[0]} ${roulette_state.result[1]}`)
                 .setDescription(result_str)
-                .setColor(GARLIC);
+                .setColor(colors["GARLIC"]);
             
             roulette_state.reset();
             await msg.edit({ embeds: [new_roulette_embed] });

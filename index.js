@@ -169,7 +169,7 @@ client.on('interactionCreate', async (interaction) => {
             const {success, message} = await place_bet(amount, choice, channel, name, interaction.user.id);
             const embed_bet = new EmbedBuilder()
                 .setTitle(message)
-                .setColor((success) ? colors.GARLIC : colors.RED)
+                .setColor((success) ? colors["GARLIC"] : colors["RED"])
 
             await interaction.editReply({ embeds: [embed_bet] });
         }
@@ -182,7 +182,7 @@ client.on('interactionCreate', async (interaction) => {
             const embed_slots = new EmbedBuilder()
                 .setTitle(message)
                 .setDescription(success ? `\n${results[0]} │ ${results[1]} │ ${results[2]}` : "")
-                .setColor((success) ? colors.GARLIC : colors.RED)
+                .setColor((success) ? colors["GARLIC"] : colors["RED"])
                 .addFields(
                     { name: "\u200B", value: " " },
                     { name: `${name}: (Bet ${amount})`, value: (success) ? String(changed) : "+0" }
@@ -196,7 +196,7 @@ client.on('interactionCreate', async (interaction) => {
 
             const embed_cloves = new EmbedBuilder()
                 .setTitle(`${name} has ${cloves} cloves! ${emote_map.heart_1}`)
-                .setColor(colors.GARLIC);
+                .setColor(colors["GARLIC"]);
 
             await interaction.editReply({ embeds: [embed_cloves] });
         }
@@ -211,7 +211,7 @@ client.on('interactionCreate', async (interaction) => {
 
             const embed_donate = new EmbedBuilder()
                 .setTitle(message)
-                .setColor((success) ? colors.GARLIC : colors.RED)
+                .setColor((success) ? colors["GARLIC"] : colors["RED"])
 
             await interaction.editReply({ embeds: [embed_donate] });
         }
@@ -350,7 +350,7 @@ client.on('interactionCreate', async (interaction) => {
 
         const err_embed = new EmbedBuilder()
             .setTitle(msg)
-            .setColor(colors.RED);
+            .setColor(colors["RED"]);
 
         try {
             if (interaction.deferred || interaction.replied) {
