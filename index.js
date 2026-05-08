@@ -148,7 +148,7 @@ client.on('interactionCreate', async (interaction) => {
         }
 
         if (interaction.commandName === "ping") {
-            await interaction.editReply({ content: "pong", flags: MessageFlags.Ephemeral });
+            await interaction.reply({ content: "pong", flags: MessageFlags.Ephemeral });
         }
         else if (interaction.commandName === "daily") {
             await interaction.deferReply({ flags: MessageFlags.Ephemeral });
@@ -329,7 +329,7 @@ client.on('interactionCreate', async (interaction) => {
         else if (interaction.commandName === "help") {
             const embed = new EmbedBuilder()
                 .setTitle("Bot Commands")
-                .setColor(colors.GARLIC)
+                .setColor(colors["GARLIC"])
                 .addFields(
                     { name: "`/ping`", value: "Check if bot is alive", inline: false },
                     { name: "`/random_joke`", value: "Gives a random joke...don't get cringed out", inline: false },

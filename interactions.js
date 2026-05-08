@@ -153,7 +153,7 @@ const place_bet = async (amount, choice, channel, name, id) => {
         let roulette_embed = new EmbedBuilder()
             .setTitle(`Roulette starting!! ${emote_map.SmugGarlic}`)
             .setDescription("Roulette will begin in 30 seconds, place your bets!")
-            .setColor(GARLIC)
+            .setColor(colors["GARLIC"])
             .addFields(
                 { name: "\u200B", value: "." }
             );
