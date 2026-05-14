@@ -23,13 +23,11 @@ const roulette_state = {
 };
 
 const slot_options = [
-    "💀","💀","💀","💀","💀",
-    "🧅","🧅","🧅","🧅",
-    "🥕","🥕","🥕","🥕",
-    "🥔","🥔","🥔","🥔",
-    "🌶️","🌶️","🌶️","🌶️",
-    "🍅","🍅","🍅","🍅",
-    "🧄","🧄","🧄"
+    "💀","💀",
+    "🧅","🧅","🧅",
+    "🥕","🥕","🥕",
+    "🥔","🥔","🥔",
+    "🧄","🧄"
 ];
 
 const get_jokes = async (count) => {
@@ -214,17 +212,17 @@ const play_slots = async (interaction, amount) => {
         }
         else if (results[0] === results[1] && results[1] === results[2]) {
             if (results[0] === "🧄") {
-                changed *= 15;
+                changed *= 50;
                 message = `GARLIC JACKPOT!! ${emote_map.bigbrain}${emote_map.heart_1}${emote_map.smug}`;
             }
             else {
-                changed *= 5;
+                changed *= 10;
                 message = `3 in a row, how lucky ${emote_map.smug}`;
             }
             await add_cloves(interaction.user.id, changed);
         }
         else if (results[0] === results[1] || results[1] === results[2] || results[2] === results[0]) {
-            changed = Math.floor(changed * 1.1);
+            changed = Math.floor(changed * 1.5);
             message = `Nice luck! Have some cloves as reward ${emote_map.heart_1}`;
             await add_cloves(interaction.user.id, changed);
         }
