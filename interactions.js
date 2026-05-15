@@ -1,6 +1,6 @@
 import { configDotenv } from 'dotenv';
 import mongoose from 'mongoose';
-import { add_cloves, subtract_cloves, get_user } from "./user_utils.js";
+import { add_cloves, subtract_cloves, get_user, update_daily, get_last_daily, get_streak } from "./user_utils.js";
 import { MessageFlags, EmbedBuilder } from "discord.js";
 import config from './config.json' with { type: 'json' };
 
@@ -282,8 +282,52 @@ const donate_cloves = async (user_id, target_id, user_name, target_name, amount)
     }
 };
 
-const check_daily = async () => {
+const check_daily = async (discord_id) => {
+    // When user uses the command, first we get last daily, if the diff between now and last daily is more than 24 hours, we update_daily with streak true, if not, then streak breaks
+    const daily_info = await get_last_daily(discord_id);
+    const now = Date.now();
+    console.log(daily_info)
+    const last_daily_time = (daily_info.last_daily !== null) ? daily_info.last_daily.getTime() : new Date(0).getTime();
+    const difference = now - last_daily_time;
+    const day = 24 * 60 * 60 * 1000;
 
+    if (difference <= day) {
+        const time_remaining = (last_daily_time + day) - now;
+
+        const hours = Math.floor(time_remaining / (1000 * 60 * 60));
+        const minutes = Math.floor((time_remaining % (1000 * 60 * 60)) / (1000 * 60));
+
+        return {success: false, message: `Cannot check in. Try again in ${hours}h ${minutes}m ${emote_map.heart_1}`};
+    }
+
+    const session = await mongoose.startSession();
+    try {
+        session.startTransaction();
+        if (difference > day) await update_daily(discord_id, false, session);
+        else await update_daily(discord_id, true, session);
+
+        const {streak_daily} = await get_streak(discord_id, session);
+        let amount = 0;
+        
+        if (streak_daily <= 7) amount = 100;
+        else if (streak_daily <= 14) amount = 200;
+        else if (streak_daily <= 21) amount = 300;
+        else if (streak_daily <= 28) amount = 400;
+        else amount = 500;
+
+        await add_cloves(discord_id, amount, session);
+
+        await session.commitTransaction();
+        return {success: true, message: `Here's your daily check in cloves ${emote_map.smug}`, streak_daily, amount};
+    }
+    catch (err) {
+        await session.abortTransaction();
+        console.error("[ERROR]", err.message);
+        return {success: false, message: `Some stoopid error occured ${emote_map.crying}`};
+    }
+    finally {
+        session.endSession();
+    }
 };
 
 export {

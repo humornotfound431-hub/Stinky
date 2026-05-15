@@ -28,11 +28,12 @@ const { channels, emote_map, colors } = config;
 const cmd_channel_perms = new Map([
     ["ping", new Set([channels[0], channels[1], channels[2], channels[3]])],
     ["random_joke", new Set(channels)],
+    ["daily", null],    
     ["bet", new Set([channels[1], channels[2], channels[3]])],
     ["slots", new Set([channels[1], channels[2], channels[3]])],
     ["cloves", new Set([channels[0], channels[1], channels[2], channels[3]])],
     ["donate", new Set([channels[0], channels[1], channels[2], channels[3]])],
-    ["help", new Set(channels)],
+    ["help", null],
     ["tic-tac-toe", new Set([channels[0], channels[2], channels[3]])]
 ]);
 
@@ -140,27 +141,40 @@ client.on('interactionCreate', async (interaction) => {
         }
 
         const name = interaction.member?.displayName || interaction.user.globalName || interaction.user.username;
-
-        if (!cmd_channel_perms.get(interaction.commandName).has(`${interaction.channel.parent.id}:${interaction.channel.name}`)) {
+        const cmd = interaction.commandName;
+        if (cmd_channel_perms.get(cmd) && !cmd_channel_perms.get(cmd).has(`${interaction.channel.parent.id}:${interaction.channel.name}`)) {
             const err = new Error("This command cannot be used here");
             err.custom_msg = true;
             throw err;
         }
 
-        if (interaction.commandName === "ping") {
+        if (cmd === "ping") {
             await interaction.reply({ content: "pong", flags: MessageFlags.Ephemeral });
         }
-        else if (interaction.commandName === "daily") {
-            await interaction.deferReply({ flags: MessageFlags.Ephemeral });
-            const {success, message, last_daily} = check_daily()
+        else if (cmd === "daily") {
+            await interaction.deferReply({});
+            const {success, message, streak_daily, amount} = await check_daily(interaction.user.id);
+
+            if (!success) {
+                return await interaction.editReply({ flags: MessageFlags.Ephemeral, embeds: [{
+                    title: message,
+                    color: colors["RED"]
+                }]});
+            }
+
+            await interaction.editReply({embeds: [{
+                title: message,
+                description: `+${amount} (${streak_daily} day streak)`,
+                color: colors["GARLIC"]
+            }]});
         }
-        else if (interaction.commandName === "random_joke") {
+        else if (cmd === "random_joke") {
             await interaction.deferReply();
             const joke_obj = await get_jokes(1);
             const content = `${joke_obj.setup}\n\n${joke_obj.punchline}`;
             await interaction.editReply({ content });
         }
-        else if (interaction.commandName === "bet") {
+        else if (cmd === "bet") {
             await interaction.deferReply();
             const channel = await client.channels.fetch(interaction.channelId);
             const amount = interaction.options.getString("amount").toLowerCase();
@@ -173,11 +187,18 @@ client.on('interactionCreate', async (interaction) => {
 
             await interaction.editReply({ embeds: [embed_bet] });
         }
-        else if (interaction.commandName === "slots") {
+        else if (cmd === "slots") {
             await interaction.deferReply();
             const amount = interaction.options.getString("amount").toLowerCase();
 
             const {success, message, changed, results} = await play_slots(interaction, amount);
+
+            if (!success) {
+                return await interaction.editReply({ embeds: [{
+                    title: message,
+                    color: colors["RED"]
+                }]});
+            }
 
             const embed_slots = new EmbedBuilder()
                 .setTitle(message)
@@ -190,7 +211,7 @@ client.on('interactionCreate', async (interaction) => {
             
             await interaction.editReply({ embeds: [embed_slots] });
         }
-        else if (interaction.commandName === "cloves") {
+        else if (cmd === "cloves") {
             await interaction.deferReply();
             const cloves = await get_cloves(interaction.user.id);
 
@@ -200,7 +221,7 @@ client.on('interactionCreate', async (interaction) => {
 
             await interaction.editReply({ embeds: [embed_cloves] });
         }
-        else if (interaction.commandName === "donate") {
+        else if (cmd === "donate") {
             await interaction.deferReply();
             let donate_amount = interaction.options.getString("amount").toLowerCase();
 
@@ -215,7 +236,7 @@ client.on('interactionCreate', async (interaction) => {
 
             await interaction.editReply({ embeds: [embed_donate] });
         }
-        else if (interaction.commandName === "tic-tac-toe") {
+        else if (cmd === "tic-tac-toe") {
             const sub = interaction.options.getSubcommand();
             const channel = await client.channels.fetch(interaction.channelId);
 
@@ -326,19 +347,15 @@ client.on('interactionCreate', async (interaction) => {
                 });
             }
         }
-        else if (interaction.commandName === "help") {
+        else if (cmd === "help") {
             const embed = new EmbedBuilder()
                 .setTitle("Bot Commands")
                 .setColor(colors["GARLIC"])
                 .addFields(
-                    { name: "`/ping`", value: "Check if bot is alive", inline: false },
-                    { name: "`/random_joke`", value: "Gives a random joke...don't get cringed out", inline: false },
-                    { name: "`/cloves`", value: "Check your clove balance", inline: false },
-                    { name: "`/bet <amount> <choice>`", value: "Play roulette [Bet on colors (red/black/green), numbers (0 - 36) or odd/even]", inline: false },
-                    { name: "`/donate <user> <amount>`", value: "Send your cloves to someone else", inline: false },
-                    { name: "`/slots <amount>`", value: "Play slots", inline: false }
+                    { name: "⚙️ General", value: "\`/ping\` - Check if bot is alive\n\`/random_joke\` - Gives a random joke...don't get cringed out", inline: false },
+                    { name: "🎰 Gambling", value: "\`/cloves\` - Check your clove balance\n\`/daily\` - Claim your daily cloves\n\`/bet <amount> <choice>\` - Play roulette\n\`/slots <amount>\` - Play slots\n\`/donate <user> <amount>\` - Send your cloves to someone else", inline: false },
+                    { name: "🎮 Games", value: "\`/tic-tac-toe\` - Play tic tac toe against someone", inline: false }
                 );
-
             await interaction.reply({ embeds: [embed] });
         }
     }

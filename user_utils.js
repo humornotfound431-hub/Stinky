@@ -36,10 +36,40 @@ const subtract_cloves = async (discord_id, amount, session = null) => {
             session
         }
     );
+};
+
+const get_last_daily = async (discord_id, session = null) => {
+    const daily_info = await User.findOne({ discord_id }, "last_daily", { session }).select("last_daily");
+    return daily_info;
 }
+
+const get_streak = async (discord_id, session = null) => {
+    return await User.findOne({ discord_id }).select("streak_daily");
+}
+
+const update_daily = async (discord_id, streak, session = null) => {
+    const update = streak ? {
+        $inc: { streak_daily: 1 },
+        $set: { last_daily: new Date() }
+    } : {
+        $set: {
+            streak_daily: 0,
+            last_daily: new Date()
+        }
+    };
+
+    return await User.findOneAndUpdate(
+        { discord_id },
+        update,
+        { session }
+    );
+};
 
 export {
     get_user,
     add_cloves,
-    subtract_cloves
+    subtract_cloves,
+    update_daily,
+    get_last_daily,
+    get_streak
 };

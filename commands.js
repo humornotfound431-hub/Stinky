@@ -13,6 +13,10 @@ const commands = [
         .setDescription('Gives a random joke'),
     
     new SlashCommandBuilder()
+        .setName("daily")
+        .setDescription("Check in daily to earn cloves"),
+    
+    new SlashCommandBuilder()
         .setName("bet")
         .setDescription("Place a bet on roulette (color (red/black/green), number (0-36), odd/even)")
         
