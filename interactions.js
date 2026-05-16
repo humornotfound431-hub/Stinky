@@ -287,7 +287,6 @@ const check_daily = async (discord_id) => {
     // When user uses the command, first we get last daily, if the diff between now and last daily is more than 24 hours, we update_daily with streak true, if not, then streak breaks
     const daily_info = await get_last_daily(discord_id);
     const now = Date.now();
-    console.log(daily_info)
     const last_daily_time = (daily_info.last_daily !== null) ? daily_info.last_daily.getTime() : new Date(0).getTime();
     const difference = now - last_daily_time;
     const day = 24 * 60 * 60 * 1000;
@@ -304,7 +303,7 @@ const check_daily = async (discord_id) => {
     const session = await mongoose.startSession();
     try {
         session.startTransaction();
-        if (difference > day) await update_daily(discord_id, false, session);
+        if (difference > day * 2) await update_daily(discord_id, false, session);
         else await update_daily(discord_id, true, session);
 
         const {streak_daily} = await get_streak(discord_id, session);
