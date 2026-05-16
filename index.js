@@ -26,15 +26,15 @@ const { channels, emote_map, colors } = config;
 // 1498159882359279778 :: Clove Casino
 // 1488042622470852709 :: Mod/Admin
 const cmd_channel_perms = new Map([
-    ["ping", new Set([channels[0], channels[1], channels[2], channels[3]])],
-    ["random_joke", new Set(channels)],
+    ["ping", null],
+    ["random_joke", null],
     ["daily", null],    
-    ["bet", new Set([channels[1], channels[2], channels[3]])],
-    ["slots", new Set([channels[1], channels[2], channels[3]])],
-    ["cloves", new Set([channels[0], channels[1], channels[2], channels[3]])],
-    ["donate", new Set([channels[0], channels[1], channels[2], channels[3]])],
+    ["bet", new Set([channels['garlic-gambling'], channels['bot-setup'], channels['test-server-general']])],
+    ["slots", new Set([channels['garlic-gambling'], channels['bot-setup'], channels['test-server-general']])],
+    ["cloves", new Set([channels['garlic-gaming'], channels['garlic-gambling'], channels['bot-setup'], channels['test-server-general']])],
+    ["donate", new Set([channels['garlic-gaming'], channels['garlic-gambling'], channels['bot-setup'], channels['test-server-general']])],
     ["help", null],
-    ["tic-tac-toe", new Set([channels[0], channels[2], channels[3]])]
+    ["tic-tac-toe", new Set([channels['garlic-gaming'], channels['bot-setup'], channels['test-server-general']])]
 ]);
 
 mongoose.connect(process.env.MONGODB_URI)
@@ -142,7 +142,8 @@ client.on('interactionCreate', async (interaction) => {
 
         const name = interaction.member?.displayName || interaction.user.globalName || interaction.user.username;
         const cmd = interaction.commandName;
-        if (cmd_channel_perms.get(cmd) && !cmd_channel_perms.get(cmd).has(`${interaction.channel.parent.id}:${interaction.channel.name}`)) {
+
+        if (cmd_channel_perms.get(cmd) && !cmd_channel_perms.get(cmd).has(`${interaction.channel.id}`)) {
             const err = new Error("This command cannot be used here");
             err.custom_msg = true;
             throw err;

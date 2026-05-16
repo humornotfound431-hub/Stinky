@@ -1,10 +1,10 @@
 {
-    "channels": [
-        "1498159882359279778:garlic-gaming",
-        "1498159882359279778:garlic-gambling",
-        "1488042622470852709:bot-setup",
-        "1488407905580351598:general"
-    ],
+    "channels": {
+        "garlic-gaming": "1500192879509770361",
+        "garlic-gambling": "1498160688714219630",
+        "bot-setup": "1488828451833122948",
+        "test-server-general": "1488407905580351600"
+    },
     "colors": {"RED": 15037299, "GARLIC": 12902821},
     "emote_map": {
         "crying": "<:crying:1493445299815845958>",
