@@ -40,7 +40,7 @@ const commands = [
         .addStringOption(option => 
             option
                 .setName("amount")
-                .setDescription("Amount of cloves to bet (Use 'all' to bet everything)")
+                .setDescription("Amount of cloves to bet. Minimum => 100 (Use 'all' to bet everything)")
                 .setRequired(true)
         ),
 

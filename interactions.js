@@ -182,6 +182,7 @@ const play_slots = async (interaction, amount) => {
         if (amount === NaN || amount <= 0) {
             return {success: false, message: `Invalid amount ${emote_map.crying}`};
         }
+        else if (amount < 100) return {success: false, message: `Invalid amount (Bet higher than 100) ${emote_map.crying}`}
    
         // if user doesnt have enough cloves
         if (user.cloves < amount) {
