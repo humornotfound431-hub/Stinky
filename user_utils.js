@@ -39,7 +39,7 @@ const subtract_cloves = async (discord_id, amount, session = null) => {
 };
 
 const get_last_daily = async (discord_id, session = null) => {
-    const daily_info = await User.findOne({ discord_id }, "last_daily", { session }).select("last_daily");
+    const daily_info = await User.findOne({ discord_id }, "last_daily streak_daily", { session });
     return daily_info;
 }
 

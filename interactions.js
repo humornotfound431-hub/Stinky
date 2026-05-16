@@ -303,22 +303,29 @@ const check_daily = async (discord_id) => {
     const session = await mongoose.startSession();
     try {
         session.startTransaction();
-        if (difference > day * 2) await update_daily(discord_id, false, session);
-        else await update_daily(discord_id, true, session);
+        let streak;
 
-        const {streak_daily} = await get_streak(discord_id, session);
+        if (difference > day * 2) {
+            await update_daily(discord_id, false, session);
+            streak = 0;
+        }
+        else {
+            await update_daily(discord_id, true, session);
+            streak = daily_info.streak_daily + 1;
+        }   
+
         let amount = 0;
         
-        if (streak_daily <= 7) amount = 100;
-        else if (streak_daily <= 14) amount = 200;
-        else if (streak_daily <= 21) amount = 300;
-        else if (streak_daily <= 28) amount = 400;
+        if (streak <= 7) amount = 100;
+        else if (streak <= 14) amount = 200;
+        else if (streak <= 21) amount = 300;
+        else if (streak <= 28) amount = 400;
         else amount = 500;
 
         await add_cloves(discord_id, amount, session);
 
         await session.commitTransaction();
-        return {success: true, message: `Here's your daily check in cloves ${emote_map.smug}`, streak_daily, amount};
+        return {success: true, message: `Here's your daily check in cloves ${emote_map.smug}`, streak, amount};
     }
     catch (err) {
         await session.abortTransaction();

@@ -153,7 +153,7 @@ client.on('interactionCreate', async (interaction) => {
         }
         else if (cmd === "daily") {
             await interaction.deferReply({});
-            const {success, message, streak_daily, amount} = await check_daily(interaction.user.id);
+            const {success, message, streak, amount} = await check_daily(interaction.user.id);
 
             if (!success) {
                 return await interaction.editReply({ flags: MessageFlags.Ephemeral, embeds: [{
@@ -164,7 +164,7 @@ client.on('interactionCreate', async (interaction) => {
 
             await interaction.editReply({embeds: [{
                 title: message,
-                description: `+${amount} (${streak_daily} day streak)`,
+                description: `+${amount} (${streak} day streak)`,
                 color: colors["GARLIC"]
             }]});
         }
