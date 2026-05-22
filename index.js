@@ -217,7 +217,7 @@ client.on('interactionCreate', async (interaction) => {
         }
         else if (cmd === "bet") {
             await interaction.deferReply({ flags: MessageFlags.Ephemeral });
-            
+
             const channel = await client.channels.fetch(interaction.channelId);
             const amount = interaction.options.getString("amount").toLowerCase();
             const choice = interaction.options.getString("choice").toLowerCase();
@@ -395,7 +395,7 @@ client.on('interactionCreate', async (interaction) => {
                 .setColor(colors["GARLIC"])
                 .addFields(
                     { name: "⚙️ General", value: "\`/ping\` - Check if bot is alive\n\`/random_joke\` - Gives a random joke...don't get cringed out", inline: false },
-                    { name: "🎰 Gambling", value: "\`/cloves\` - Check your clove balance\n\`/daily\` - Claim your daily cloves\n\`/bet <amount> <choice>\` - Play roulette\n\`/slots <amount>\` - Play slots\n\`/donate <user> <amount>\` - Send your cloves to someone else", inline: false },
+                    { name: "🎰 Gambling", value: "\`/cloves\` - Check your clove balance\n\`/bet <amount> <choice>\` - Play roulette\n\`/slots <amount>\` - Play slots\n\`/donate <user> <amount>\` - Send your cloves to someone else", inline: false },
                     { name: "🎮 Games", value: "\`/tic-tac-toe\` - Play tic tac toe against someone", inline: false }
                 );
             await interaction.reply({ embeds: [embed] });
