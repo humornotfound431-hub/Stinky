@@ -7,7 +7,8 @@ import {
     MessageFlags,
     ActionRowBuilder,
     ButtonBuilder,
-    ButtonStyle 
+    ButtonStyle, 
+    Message
 } from 'discord.js';
 
 import mongoose from 'mongoose';
@@ -215,7 +216,8 @@ client.on('interactionCreate', async (interaction) => {
             await interaction.editReply({ content });
         }
         else if (cmd === "bet") {
-            await interaction.deferReply();
+            await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+            
             const channel = await client.channels.fetch(interaction.channelId);
             const amount = interaction.options.getString("amount").toLowerCase();
             const choice = interaction.options.getString("choice").toLowerCase();
