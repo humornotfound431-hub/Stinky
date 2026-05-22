@@ -14,7 +14,7 @@ const commands = [
     
     new SlashCommandBuilder()
         .setName("daily")
-        .setDescription("Check in daily to earn cloves"),
+        .setDescription("Sends the daily cloves message"),
     
     new SlashCommandBuilder()
         .setName("bet")

@@ -13,6 +13,7 @@ import {
 import mongoose from 'mongoose';
 
 import { get_jokes, place_bet, get_cloves, donate_cloves, play_slots, check_daily } from './interactions.js';
+import { get_sorted_streaks } from "./user_utils.js";
 import TicTacToe from './games/tictactoe.js';
 import config from './config.json' with { type: 'json' };
 
@@ -28,7 +29,7 @@ const { channels, emote_map, colors } = config;
 const cmd_channel_perms = new Map([
     ["ping", null],
     ["random_joke", null],
-    ["daily", null],    
+    ["daily", new Set([channels['daily-cloves'], channels['test-server-general']])],    
     ["bet", new Set([channels['garlic-gambling'], channels['bot-setup'], channels['test-server-general']])],
     ["slots", new Set([channels['garlic-gambling'], channels['bot-setup'], channels['test-server-general']])],
     ["cloves", new Set([channels['garlic-gaming'], channels['garlic-gambling'], channels['bot-setup'], channels['test-server-general']])],
@@ -68,76 +69,104 @@ client.on('interactionCreate', async (interaction) => {
     try {
         if (interaction.isButton()) {
             const [type, id] = interaction.customId.split(":");
-            switch (type) {
-                case "tic-tac-toe":
-                    if (!currentGame) {
-                        return await interaction.reply({
-                            embeds: [{
-                                title: `No game running right now ${emote_map.sweat_1}`,
-                                color: colors["RED"]
-                            }],
 
-                            flags: MessageFlags.Ephemeral
-                        });
-                    }
-                    
-                    const {success, message, winner, draw, board} = await currentGame.place_mark(interaction.user.id, Number(id));
-
-                    if (!success) {
-                        return await interaction.reply({
-                            embeds: [{
-                                title: message,
-                                color: colors["RED"]
-                            }],
-
-                            flags: MessageFlags.Ephemeral
-                        });
-                    }
-
-                    let buttons = [];
-                    for (let row_index = 0; row_index < currentGame.board.length; row_index++) {
-                        buttons.push(new ActionRowBuilder().addComponents(...currentGame.board[row_index].map((cell, cell_index) => {
-                            return new ButtonBuilder()
-                                .setCustomId(`tic-tac-toe:${(row_index * 3) + cell_index + 1}`)
-                                .setLabel(currentGame.board[row_index][cell_index] || "\u200b")
-                                .setStyle(ButtonStyle.Secondary)
-                        })));
-                    }
-                    
-                    let desc = "";
-                    const msg = currentGame.msg;
-                    if (winner) {
-                        desc += `\n\n🏆 Winner: <@${winner}>`;
-                        currentGame = null;
-                    } else if (draw) {
-                        desc += `\n\n🤝 Draw`;
-                        currentGame = null;
-                    }
-                    else {
-                        desc = `<@${currentGame.player1_id}>: ${currentGame.id_to_symbol[currentGame.player1_id]}\n` +
-                                `<@${currentGame.player2_id}>: ${currentGame.id_to_symbol[currentGame.player2_id]}\n\n` +
-                                `**Turn:** <@${currentGame.turn}>\n\n`;
-                    }
-
-                    await msg.edit({
+            if (type === "tic-tac-toe") {
+                if (!currentGame) {
+                    return await interaction.reply({
                         embeds: [{
-                            title: "Tic Tac Toe",
-                            description: desc,
-                            color: colors["GARLIC"],
+                            title: `No game running right now ${emote_map.sweat_1}`,
+                            color: colors["RED"]
                         }],
 
-                        components: buttons
+                        flags: MessageFlags.Ephemeral
                     });
-                    break;
-            }
+                }
+                
+                const {success, message, winner, draw, board} = await currentGame.place_mark(interaction.user.id, Number(id));
 
-            return await interaction.reply({
-                embeds: [{
-                    title: "You made a move yay",
-                    color: colors["GARLIC"]
-                }],
-                flags: MessageFlags.Ephemeral
-            });
+                if (!success) {
+                    return await interaction.reply({
+                        embeds: [{
+                            title: message,
+                            color: colors["RED"]
+                        }],
+
+                        flags: MessageFlags.Ephemeral
+                    });
+                }
+
+                let buttons = [];
+                for (let row_index = 0; row_index < currentGame.board.length; row_index++) {
+                    buttons.push(new ActionRowBuilder().addComponents(...currentGame.board[row_index].map((cell, cell_index) => {
+                        return new ButtonBuilder()
+                            .setCustomId(`tic-tac-toe:${(row_index * 3) + cell_index + 1}`)
+                            .setLabel(currentGame.board[row_index][cell_index] || "\u200b")
+                            .setStyle(ButtonStyle.Secondary)
+                    })));
+                }
+                
+                let desc = "";
+                const msg = currentGame.msg;
+                if (winner) {
+                    desc += `\n\n🏆 Winner: <@${winner}>`;
+                    currentGame = null;
+                } else if (draw) {
+                    desc += `\n\n🤝 Draw`;
+                    currentGame = null;
+                }
+                else {
+                    desc = `<@${currentGame.player1_id}>: ${currentGame.id_to_symbol[currentGame.player1_id]}\n` +
+                            `<@${currentGame.player2_id}>: ${currentGame.id_to_symbol[currentGame.player2_id]}\n\n` +
+                            `**Turn:** <@${currentGame.turn}>\n\n`;
+                }
+
+                await msg.edit({
+                    embeds: [{
+                        title: "Tic Tac Toe",
+                        description: desc,
+                        color: colors["GARLIC"],
+                    }],
+
+                    components: buttons
+                });
+                
+                return await interaction.reply({
+                    embeds: [{
+                        title: "You made a move yay",
+                        color: colors["GARLIC"]
+                    }],
+                    flags: MessageFlags.Ephemeral
+                });
+            }
+            else if (type === "daily" && id === "claim") {
+                const {success, message, streak, amount} = await check_daily(interaction.user.id);
+
+                if (success) {
+                    const leaderboard = await get_sorted_streaks();
+
+                    let desc = "Claim your daily cloves using the button below\n\n**Streak Leaderboard:**\n\n";
+
+                    leaderboard.forEach((user, index) => {
+                        desc += `${index + 1}. <@${user.discord_id}>: ${user.streak_daily}\n`;
+                    });
+
+                    await interaction.message.edit({
+                        embeds: [{
+                            title: `${emote_map.blob} Daily Cloves ${emote_map.blob}`,
+                            description: desc,
+                            color: colors["GARLIC"]
+                        }],
+
+                        components: interaction.message.components
+                    });
+                }
+
+                return await interaction.reply({flags: MessageFlags.Ephemeral, embeds: [{
+                    title: message,
+                    description: success ? `+${amount} (${streak} day streak)` : "",
+                    color: success ? colors["GARLIC"] : colors["RED"]
+                }]});
+            }
         }
 
         const name = interaction.member?.displayName || interaction.user.globalName || interaction.user.username;
@@ -154,20 +183,30 @@ client.on('interactionCreate', async (interaction) => {
         }
         else if (cmd === "daily") {
             await interaction.deferReply({});
-            const {success, message, streak, amount} = await check_daily(interaction.user.id);
 
-            if (!success) {
-                return await interaction.editReply({ flags: MessageFlags.Ephemeral, embeds: [{
-                    title: message,
-                    color: colors["RED"]
-                }]});
-            }
+            const leaderboard = await get_sorted_streaks();
+            let desc = "Claim your daily cloves using the button below\n\n**Streak Leaderboard:**\n\n";
 
-            await interaction.editReply({embeds: [{
-                title: message,
-                description: `+${amount} (${streak} day streak)`,
-                color: colors["GARLIC"]
-            }]});
+            leaderboard.forEach((user, index) => {
+                desc += `${index + 1}. <@${user.discord_id}>: ${user.streak_daily}\n`;
+            });
+
+            await interaction.editReply({
+                embeds: [{
+                    title: `${emote_map.blob} Daily Cloves ${emote_map.blob}`,
+                    description: desc,
+                    color: colors["GARLIC"]
+                }],
+
+                components: [
+                    new ActionRowBuilder().addComponents(
+                        new ButtonBuilder()
+                            .setCustomId("daily:claim")
+                            .setEmoji("🧄")
+                            .setStyle(ButtonStyle.Success)
+                    )
+                ]
+            });
         }
         else if (cmd === "random_joke") {
             await interaction.deferReply();
