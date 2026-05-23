@@ -140,6 +140,7 @@ client.on('interactionCreate', async (interaction) => {
                 });
             }
             else if (type === "daily" && id === "claim") {
+                await interaction.deferReply({flags: MessageFlags.Ephemeral});
                 const {success, message, streak, amount} = await check_daily(interaction.user.id);
 
                 if (success) {
@@ -162,7 +163,7 @@ client.on('interactionCreate', async (interaction) => {
                     });
                 }
 
-                return await interaction.reply({flags: MessageFlags.Ephemeral, embeds: [{
+                return await interaction.editReply({embeds: [{
                     title: message,
                     description: success ? `+${amount} (${streak} day streak)` : "",
                     color: success ? colors["GARLIC"] : colors["RED"]
