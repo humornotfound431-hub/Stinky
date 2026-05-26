@@ -1,11 +1,13 @@
 import { configDotenv } from 'dotenv';
 import mongoose from 'mongoose';
 import { add_cloves, subtract_cloves, get_user, update_daily, get_last_daily, get_streak } from "./user_utils.js";
-import { MessageFlags, EmbedBuilder } from "discord.js";
+import { MessageFlags, EmbedBuilder, AttachmentBuilder } from "discord.js";
 import config from './config.json' with { type: 'json' };
 
 const { emote_map, colors } = config;
 configDotenv();
+
+const roulette_gif = new AttachmentBuilder('./gifs/roulette.gif');
 
 const roulette_state = {
     active: false,
@@ -135,7 +137,7 @@ const place_bet = async (amount, choice, channel, name, id) => {
                 .setColor(colors["GARLIC"]);
             
             roulette_state.reset();
-            await msg.edit({ embeds: [new_roulette_embed] });
+            await msg.edit({ embeds: [new_roulette_embed], files: [] });
         }, 30000);
 
         roulette_state.bets.push([amount, choice, id, name]);
@@ -152,11 +154,9 @@ const place_bet = async (amount, choice, channel, name, id) => {
             .setTitle(`Roulette starting!! ${emote_map.SmugGarlic}`)
             .setDescription("Roulette will begin in 30 seconds, place your bets!")
             .setColor(colors["GARLIC"])
-            .addFields(
-                { name: "\u200B", value: "." }
-            );
+            .setImage("attachment://roulette.gif");
 
-        msg = await channel.send({ embeds: [roulette_embed] });
+        msg = await channel.send({ embeds: [roulette_embed], files: [roulette_gif] });
         return { success: true, message: `Your bet was placed ${emote_map.smug}`};
     }
 
