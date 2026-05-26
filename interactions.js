@@ -223,7 +223,7 @@ const play_slots = async (interaction, amount) => {
             await add_cloves(interaction.user.id, changed);
         }
         else if (results[0] === results[1] || results[1] === results[2] || results[2] === results[0]) {
-            changed = Math.floor(changed * 1.5);
+            changed = Math.floor(changed * 0.5);
             message = `Nice luck! Have some cloves as reward ${emote_map.heart_1}`;
             await add_cloves(interaction.user.id, changed);
         }
