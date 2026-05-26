@@ -316,11 +316,11 @@ const check_daily = async (discord_id) => {
 
         let amount = 0;
         
-        if (streak <= 7) amount = 100;
-        else if (streak <= 14) amount = 200;
-        else if (streak <= 21) amount = 300;
-        else if (streak <= 28) amount = 400;
-        else amount = 500;
+        if (streak <= 7) amount = 200;
+        else if (streak <= 14) amount = 400;
+        else if (streak <= 21) amount = 600;
+        else if (streak <= 28) amount = 800;
+        else amount = 1000;
 
         await add_cloves(discord_id, amount, session);
 
