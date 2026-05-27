@@ -3,11 +3,12 @@ import mongoose from 'mongoose';
 import { add_cloves, subtract_cloves, get_user, update_daily, get_last_daily, get_streak } from "./user_utils.js";
 import { MessageFlags, EmbedBuilder, AttachmentBuilder } from "discord.js";
 import config from './config.json' with { type: 'json' };
+import fs from "fs";
 
 const { emote_map, colors } = config;
 configDotenv();
 
-const roulette_gif = new AttachmentBuilder('./gifs/roulette.gif');
+const roulette_gif = new AttachmentBuilder("./gifs/roulette.gif");
 
 const roulette_state = {
     active: false,
@@ -137,7 +138,10 @@ const place_bet = async (amount, choice, channel, name, id) => {
                 .setColor(colors["GARLIC"]);
             
             roulette_state.reset();
-            await msg.edit({ embeds: [new_roulette_embed], files: [] });
+            if (msg) await msg.edit({ embeds: [new_roulette_embed], files: [] });
+            else {
+                await channel.send({ embeds: [new_roulette_embed] });
+            }
         }, 30000);
 
         roulette_state.bets.push([amount, choice, id, name]);
@@ -150,13 +154,22 @@ const place_bet = async (amount, choice, channel, name, id) => {
 
         roulette_state.result = [number, color, (number === 0) ? null : (number % 2) == 0 ? "even" : "odd"];
 
-        let roulette_embed = new EmbedBuilder()
-            .setTitle(`Roulette starting!! ${emote_map.SmugGarlic}`)
-            .setDescription("Roulette will begin in 30 seconds, place your bets!")
-            .setColor(colors["GARLIC"])
-            .setImage("attachment://roulette.gif");
-
-        msg = await channel.send({ embeds: [roulette_embed], files: [roulette_gif] });
+        msg = await channel.send({
+            embeds: [
+                {
+                    title: `Roulette starting!! ${emote_map.SmugGarlic}`,
+                    description: "Roulette will begin in 30 seconds, place your bets!",
+                    color: colors["GARLIC"],
+                    image: {
+                        url: "attachment://roulette.gif"
+                    }
+                }
+            ],
+            files: [
+                roulette_gif
+            ]
+        });
+        
         return { success: true, message: `Your bet was placed ${emote_map.smug}`};
     }
 
