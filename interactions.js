@@ -5,10 +5,8 @@ import { MessageFlags, EmbedBuilder, AttachmentBuilder } from "discord.js";
 import config from './config.json' with { type: 'json' };
 import fs from "fs";
 
-const { emote_map, colors } = config;
+const { emote_map, colors, images } = config;
 configDotenv();
-
-const roulette_gif = new AttachmentBuilder("./gifs/roulette.gif");
 
 const roulette_state = {
     active: false,
@@ -138,7 +136,7 @@ const place_bet = async (amount, choice, channel, name, id) => {
                 .setColor(colors["GARLIC"]);
             
             roulette_state.reset();
-            if (msg) await msg.edit({ embeds: [new_roulette_embed], files: [] });
+            if (msg) await msg.edit({ embeds: [new_roulette_embed] });
             else {
                 await channel.send({ embeds: [new_roulette_embed] });
             }
@@ -161,12 +159,9 @@ const place_bet = async (amount, choice, channel, name, id) => {
                     description: "Roulette will begin in 30 seconds, place your bets!",
                     color: colors["GARLIC"],
                     image: {
-                        url: "attachment://roulette.gif"
+                        url: images["roulette_gif"]
                     }
                 }
-            ],
-            files: [
-                roulette_gif
             ]
         });
         
