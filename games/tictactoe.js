@@ -31,20 +31,6 @@ class TicTacToe {
     }
 
     async place_mark(id, position) {
-        // const session = await mongoose.startSession();
-
-        // try {
-
-        // }
-        // catch (err) {
-        //     await session.abortTransaction();
-        // return {success: false, message: `Some stoopid error occured ${emote_map.crying}`};
-        // }
-        // finally {
-        //     session.endSession();
-        // }
-        // session.startTransaction();
-
         if (this.turn !== id) {
             return {success: false, message: `It's not your turn ${emote_map.peek}`};
         }
