@@ -5,6 +5,10 @@ import { MessageFlags, EmbedBuilder, AttachmentBuilder } from "discord.js";
 import config from './config.json' with { type: 'json' };
 import fs from "fs";
 
+const attachment = new AttachmentBuilder("images/1.png", {
+    name: "1.png"
+});
+
 const { emote_map, colors, images } = config;
 configDotenv();
 
@@ -130,13 +134,22 @@ const place_bet = async (amount, choice, channel, name, id) => {
             result_str = results.join("");
             clearInterval(loading);
 
-            let new_roulette_embed = new EmbedBuilder()
-                .setTitle(`Roulette rolled ${roulette_state.result[0]} ${roulette_state.result[1]}`)
-                .setDescription(result_str)
-                .setColor(colors["GARLIC"]);
+            // console.log(await fetch(images["10"]).then(r => ({
+            //     status: r.status,
+            //     type: r.headers.get("content-type")
+            // })));
+
+            let new_roulette_embed = {
+                title: `Roulete rolled ${roulette_state.result[0]} ${roulette_state.result[1]}`,
+                description: result_str,
+                color: colors["GARLIC"],
+                image: {
+                    url: images[`${roulette_state.result[0]}`]
+                }
+            };
             
             roulette_state.reset();
-            if (msg) await msg.edit({ embeds: [new_roulette_embed] });
+            if (msg) await msg.edit({ embeds: [new_roulette_embed], });
             else {
                 await channel.send({ embeds: [new_roulette_embed] });
             }
