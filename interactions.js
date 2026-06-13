@@ -1,13 +1,9 @@
 import { configDotenv } from 'dotenv';
 import mongoose from 'mongoose';
 import { add_cloves, subtract_cloves, get_user, update_daily, get_last_daily, get_streak } from "./user_utils.js";
-import { MessageFlags, EmbedBuilder, AttachmentBuilder } from "discord.js";
+import { MessageFlags, EmbedBuilder } from "discord.js";
 import config from './config.json' with { type: 'json' };
 import fs from "fs";
-
-const attachment = new AttachmentBuilder("images/1.png", {
-    name: "1.png"
-});
 
 const { emote_map, colors, images } = config;
 configDotenv();
@@ -38,7 +34,7 @@ const slot_options = [
 const get_jokes = async (count) => {
     let response;
 
-    if (count === 1) {
+    if (count == 1) {
         response = await fetch('https://official-joke-api.appspot.com/jokes/random');
     }
     else if (count > 1 && count <= 150) {
@@ -133,11 +129,6 @@ const place_bet = async (amount, choice, channel, name, id) => {
 
             result_str = results.join("");
             clearInterval(loading);
-
-            // console.log(await fetch(images["10"]).then(r => ({
-            //     status: r.status,
-            //     type: r.headers.get("content-type")
-            // })));
 
             let new_roulette_embed = {
                 title: `Roulete rolled ${roulette_state.result[0]} ${roulette_state.result[1]}`,
@@ -333,7 +324,7 @@ const check_daily = async (discord_id) => {
         else {
             await update_daily(discord_id, true, session);
             streak = daily_info.streak_daily + 1;
-        }   
+        }
 
         let amount = 0;
         
@@ -358,7 +349,12 @@ const check_daily = async (discord_id) => {
     }
 };
 
+const TEST_FUNCS = {
+    
+};
+
 export {
+    TEST_FUNCS,
     get_jokes,
     place_bet,
     get_cloves,
