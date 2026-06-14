@@ -785,7 +785,7 @@ client.on('interactionCreate', async (interaction) => {
                 .addFields(
                     { name: "⚙️ General", value: "\`/ping\` - Check if bot is alive\n\`/random_joke\` - Gives a random joke...don't get cringed out", inline: false },
                     { name: "🎰 Gambling", value: "\`/cloves\` - Check your clove balance\n\`/bet <amount> <choice>\` - Play roulette\n\`/slots <amount>\` - Play slots\n\`/donate <user> <amount>\` - Send your cloves to someone else", inline: false },
-                    { name: "🎮 Games", value: "\`/tic-tac-toe\` - Play tic tac toe against someone", inline: false }
+                    { name: "🎮 Games", value: "\`/tic-tac-toe\` - Play tic tac toe against someone\n\`/chess\` - Play Chess against someone", inline: false }
                 );
             await interaction.reply({ embeds: [embed] });
         }
