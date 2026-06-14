@@ -99,17 +99,6 @@ const commands = [
         .setName("chess")
         .setDescription("Play chess")
 
-        .addSubcommand(sub => 
-            sub
-                .setName("start")
-                .setDescription("Start a new game")
-        )
-        .addSubcommand(sub => 
-            sub
-                .setName("join")
-                .setDescription("Join a game")
-        )
-
 ].map(cmd => cmd.toJSON());
 
 const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);

@@ -182,7 +182,72 @@ client.on('interactionCreate', async (interaction) => {
             else if (type === "chess") { // Refractor this later
                 if (!(await checkCurrentGame(interaction))) return;
 
-                if (id === "piece_select") {
+                if (id === "join") {
+                    const sameUser = currentGame.player1_id === interaction.user.id;
+                    if (currentGame.player2 || sameUser) {
+                        return await interaction.reply({
+                            embeds: [{
+                                title: sameUser ? "Cant play by yourself...yet" : "A Game already started",
+                                color: colors["GARLIC"]
+                            }],
+
+                            flags: MessageFlags.Ephemeral
+                        });
+                    }
+
+                    currentGame.player2_id = interaction.user.id;
+                    await currentGame.start();
+
+                    let buttons = [
+                        new ActionRowBuilder().addComponents(
+                            new ButtonBuilder()
+                                .setCustomId("chess:piece_select")
+                                .setLabel("Select Piece")
+                                .setStyle(ButtonStyle.Secondary),
+
+                            new ButtonBuilder()
+                                .setCustomId("chess:draw")
+                                .setLabel("Draw")
+                                .setStyle(ButtonStyle.Primary),
+
+                            new ButtonBuilder()
+                                .setCustomId("chess:resign")
+                                .setLabel("Resign")
+                                .setStyle(ButtonStyle.Danger)
+                        )
+                    ];
+
+                    const attachment = new AttachmentBuilder(
+                        currentGame.boardBuffer,
+                        { name: "board.png" }
+                    );
+
+                    await currentGame.msg.edit({
+                        embeds: [{
+                            title: "Chess",
+                            description:
+                                `<@${currentGame.player1_id}>: ${currentGame.getColorName(currentGame.player1_id)}\n` +
+                                `<@${currentGame.player2_id}>: ${currentGame.getColorName(currentGame.player2_id)}\n\n` +
+                                `**Turn:** <@${currentGame.symbol_to_id[currentGame.game.turn()]}>\n\n`,
+                            color: colors["GARLIC"],
+                            image: {
+                                url: "attachment://board.png"
+                            }
+                        }],
+                        files: [attachment],
+                        components: buttons
+                    });
+
+                    await interaction.reply({
+                        embeds: [{
+                            title: "Joined the game",
+                            color: colors["GARLIC"]
+                        }],
+
+                        flags: MessageFlags.Ephemeral
+                    });
+                }
+                else if (id === "piece_select") {
                     const row1 = new ActionRowBuilder().addComponents(
                         new ButtonBuilder().setCustomId('chess_moves:k').setLabel('♔ King').setStyle(ButtonStyle.Secondary),
                         new ButtonBuilder().setCustomId('chess_moves:q').setLabel('♕ Queen').setStyle(ButtonStyle.Secondary),
@@ -686,97 +751,49 @@ client.on('interactionCreate', async (interaction) => {
             }
         }
         else if (cmd === "chess") {
-            const sub = interaction.options.getSubcommand();
             const channel = await client.channels.fetch(interaction.channelId);
 
-            if (sub === "start") {
-                if (currentGame) {
-                    return await interaction.reply({
-                        embeds: [{
-                            title: `A game is already running ${emote_map.peek}`,
-                            color: colors["RED"]
-                        }],
-
-                        flags: MessageFlags.Ephemeral
-                    });
-                }
-
-                currentGame = new Chess_Game(interaction.user.id);
-
-                currentGame.msg = await channel.send({
+            if (currentGame) {
+                return await interaction.reply({
                     embeds: [{
-                        title: "Chess Challenge",
-                        description:
-                            `${interaction.user} started a Chess game ${emote_map.peek}\n\n` +
-                            `Use \`/chess join\` to join the game!`,
-                        color: colors["GARLIC"],
+                        title: `A game is already running ${emote_map.peek}`,
+                        color: colors["RED"]
+                    }],
+
+                    flags: MessageFlags.Ephemeral
+                });
+            }
+
+            currentGame = new Chess_Game(interaction.user.id);
+
+            currentGame.msg = await channel.send({
+                embeds: [{
+                    title: "Chess Challenge",
+                    description:
+                        `${interaction.user} started a Chess game ${emote_map.peek}\n\n` +
+                        `Use the button below to join!!`,
+                    color: colors["GARLIC"],
+                }],
+
+                components: [{
+                    type: 1,
+                    components: [{
+                        type: 2,
+                        style: 1,
+                        label: "Join",
+                        custom_id: "chess:join"
                     }]
-                });
+                }]
+            });
 
-                await interaction.reply({
-                    embeds: [{
-                        title: "Started the game",
-                        color: colors["GARLIC"]
-                    }],
+            await interaction.reply({
+                embeds: [{
+                    title: "Started the game",
+                    color: colors["GARLIC"]
+                }],
 
-                    flags: MessageFlags.Ephemeral
-                });
-            }
-            else if (sub === "join") {
-                if (!(await checkCurrentGame(interaction))) return;
-
-                currentGame.player2_id = interaction.user.id;
-                await currentGame.start();
-
-                let buttons = [
-                    new ActionRowBuilder().addComponents(
-                        new ButtonBuilder()
-                            .setCustomId("chess:piece_select")
-                            .setLabel("Select Piece")
-                            .setStyle(ButtonStyle.Secondary),
-
-                        new ButtonBuilder()
-                            .setCustomId("chess:draw")
-                            .setLabel("Draw")
-                            .setStyle(ButtonStyle.Primary),
-
-                        new ButtonBuilder()
-                            .setCustomId("chess:resign")
-                            .setLabel("Resign")
-                            .setStyle(ButtonStyle.Danger)
-                    )
-                ];
-
-                const attachment = new AttachmentBuilder(
-                    currentGame.boardBuffer,
-                    { name: "board.png" }
-                );
-
-                await currentGame.msg.edit({
-                    embeds: [{
-                        title: "Chess",
-                        description:
-                            `<@${currentGame.player1_id}>: ${currentGame.getColorName(currentGame.player1_id)}\n` +
-                            `<@${currentGame.player2_id}>: ${currentGame.getColorName(currentGame.player2_id)}\n\n` +
-                            `**Turn:** <@${currentGame.symbol_to_id[currentGame.game.turn()]}>\n\n`,
-                        color: colors["GARLIC"],
-                        image: {
-                            url: "attachment://board.png"
-                        }
-                    }],
-                    files: [attachment],
-                    components: buttons
-                });
-
-                await interaction.reply({
-                    embeds: [{
-                        title: "Joined the game",
-                        color: colors["GARLIC"]
-                    }],
-
-                    flags: MessageFlags.Ephemeral
-                });
-            }
+                flags: MessageFlags.Ephemeral
+            });
         }
         else if (cmd === "help") {
             const embed = new EmbedBuilder()
