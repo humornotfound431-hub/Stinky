@@ -221,7 +221,7 @@ client.on('interactionCreate', async (interaction) => {
 
                         
                     const attachment = new AttachmentBuilder(
-                        currentGame.canvas.toBuffer("image/png"),
+                        currentGame.boardBuffer,
                         { name: "board.png" }
                     );
 
@@ -254,7 +254,7 @@ client.on('interactionCreate', async (interaction) => {
                 else if (id === "resign") {
                         
                     const attachment = new AttachmentBuilder(
-                        currentGame.canvas.toBuffer("image/png"),
+                        currentGame.boardBuffer,
                         { name: "board.png" }
                     );
 
@@ -342,10 +342,10 @@ client.on('interactionCreate', async (interaction) => {
             else if (type === "chess_move") {
                 if (!(await checkCurrentGame(interaction))) return;
 
-                const {success, message, isGameOver, gameOverInfo} = currentGame.make_move(interaction.user.id, id);
+                const {success, message, isGameOver, gameOverInfo} = await currentGame.make_move(interaction.user.id, id);
                 
                 const attachment = new AttachmentBuilder(
-                    currentGame.canvas.toBuffer("image/png"),
+                    currentGame.boardBuffer,
                     { name: "board.png" }
                 );
 
@@ -410,7 +410,7 @@ client.on('interactionCreate', async (interaction) => {
                 }
 
                 const attachment = new AttachmentBuilder(
-                    currentGame.canvas.toBuffer("image/png"),
+                    currentGame.boardBuffer,
                     { name: "board.png" }
                 );
 
@@ -453,7 +453,7 @@ client.on('interactionCreate', async (interaction) => {
                     ];
 
                     const attachment = new AttachmentBuilder(
-                        currentGame.canvas.toBuffer("image/png"),
+                        currentGame.boardBuffer,
                         { name: "board.png" }
                     );
 
@@ -748,7 +748,7 @@ client.on('interactionCreate', async (interaction) => {
                 ];
 
                 const attachment = new AttachmentBuilder(
-                    currentGame.canvas.toBuffer("image/png"),
+                    currentGame.boardBuffer,
                     { name: "board.png" }
                 );
 

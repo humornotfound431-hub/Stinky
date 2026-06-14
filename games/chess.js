@@ -1,41 +1,49 @@
 import { Chess } from "chess.js";
-import { createCanvas, loadImage } from "canvas";
 import fs from "fs";
 import { get_user, add_cloves, subtract_cloves } from "../user_utils.js";
 import config from "../config.json" with { type: "json" };
+import sharp from "sharp";
 
 const { emote_map } = config;
 const BOARD_SIZE = 800;
-const board_image = await loadImage("./images/board.png");
 
+const loadImage = (path) => fs.readFileSync(path);
+
+const board_image = loadImage("./images/board.png");
 const pieces = {
-    "rb": await loadImage("./images/rb.png"),
-    "nb": await loadImage("./images/nb.png"),
-    "bb": await loadImage("./images/bb.png"),
-    "qb": await loadImage("./images/qb.png"),
-    "kb": await loadImage("./images/kb.png"),
-    "pb": await loadImage("./images/pb.png"),
+    "rb": loadImage("./images/rb.png"),
+    "nb": loadImage("./images/nb.png"),
+    "bb": loadImage("./images/bb.png"),
+    "qb": loadImage("./images/qb.png"),
+    "kb": loadImage("./images/kb.png"),
+    "pb": loadImage("./images/pb.png"),
 
-    "rw": await loadImage("./images/rw.png"),
-    "nw": await loadImage("./images/nw.png"),
-    "bw": await loadImage("./images/bw.png"),
-    "qw": await loadImage("./images/qw.png"),
-    "kw": await loadImage("./images/kw.png"),
-    "pw": await loadImage("./images/pw.png"),
+    "rw": loadImage("./images/rw.png"),
+    "nw": loadImage("./images/nw.png"),
+    "bw": loadImage("./images/bw.png"),
+    "qw": loadImage("./images/qw.png"),
+    "kw": loadImage("./images/kw.png"),
+    "pw": loadImage("./images/pw.png"),
 
-    "blank_w": await loadImage("./images/light_empty.png"),
-    "blank_b": await loadImage("./images/dark_empty.png")
+    "blank_w": loadImage("./images/light_empty.png"),
+    "blank_b": loadImage("./images/dark_empty.png")
 };
+
+const resizedPieces = {};
+for (const [key, buf] of Object.entries(pieces)) {
+    resizedPieces[key] = await sharp(buf).resize(BOARD_SIZE / 8, BOARD_SIZE / 8).png().toBuffer();
+}
+
+const resizedBoard = await sharp(board_image)
+    .resize(BOARD_SIZE, BOARD_SIZE)
+    .png()
+    .toBuffer();
 
 class Chess_Game {
     constructor(id1) {
         this.player1_id = id1;
-        this.canvas = createCanvas(BOARD_SIZE, BOARD_SIZE)
-        this.canvas_context = this.canvas.getContext("2d");
-        this.canvas_context.drawImage(board_image, 0, 0, BOARD_SIZE, BOARD_SIZE);
-
         this.game = new Chess();
-        this.update_board();
+        this.boardBuffer = null;
     }
 
     async start() {
@@ -52,11 +60,10 @@ class Chess_Game {
             this.symbol_to_id = { "b": this.player1_id, "w": this.player2_id };
         }
 
-        this.winner = null;
-        this.ended = false;
+        this.boardBuffer = await this.update_board();
     }
 
-    make_move(id, move) {
+    async make_move(id, move) {
         if (this.id_to_symbol[id] !== this.game.turn()) return {success: false, message: "Not your turn"};
 
         try {
@@ -64,7 +71,7 @@ class Chess_Game {
             const isGameOver = this.game.isGameOver();
             let gameOverInfo = null;
 
-            const new_board = this.update_board();
+            this.boardBuffer = await this.update_board();
 
             if (isGameOver) {
                 gameOverInfo = this.handleGameOver();
@@ -101,20 +108,29 @@ class Chess_Game {
         }
     }
 
-    update_board() {
+    async update_board() {
         const board = this.game.board();
+        const composites = [];
 
         for (let i = 0; i < 8; i++) {
             for (let j = 0; j < 8; j++) {
+                const top = i * (BOARD_SIZE / 8);
+                const left = j * (BOARD_SIZE / 8);
+
                 let sqaure_fill = (j + i) % 2 === 1 ? "blank_b" : "blank_w";
-                this.canvas_context.drawImage(pieces[sqaure_fill], j * (BOARD_SIZE / 8), i * (BOARD_SIZE / 8), (BOARD_SIZE / 8), (BOARD_SIZE / 8));
+                composites.push({ input: resizedPieces[sqaure_fill], top, left });
 
                 if (board[i][j] !== null) {
                     sqaure_fill = board[i][j].type + board[i][j].color;
-                    this.canvas_context.drawImage(pieces[sqaure_fill], j * (BOARD_SIZE / 8), i * (BOARD_SIZE / 8), (BOARD_SIZE / 8), (BOARD_SIZE / 8));
+                    composites.push({ input: resizedPieces[sqaure_fill], top, left });
                 }
             }
         }
+
+        return await sharp(resizedBoard)
+            .composite(composites)
+            .png()
+            .toBuffer();
     }
 
     getColorName (id) {
@@ -124,19 +140,8 @@ class Chess_Game {
 
 const instance = new Chess_Game();
 
-// instance.make_move(instance.player1_id, "e4");
-// instance.make_move(instance.player2_id, "e5");
-
-// instance.make_move(instance.player1_id, "Nf3");
-// instance.make_move("b", "Nc6");
-
-// instance.make_move("w", "Bc4");
-// instance.make_move("b", "Bc5");
-
-// instance.make_move("w", "O-O");
-
 const TEST_FUNCS = {
-    "make_move": (...args) => instance.make_move(...args),
-    "update_board": (...args) => instance.update_board(...args)
+    
 };
+
 export {TEST_FUNCS, Chess_Game};
