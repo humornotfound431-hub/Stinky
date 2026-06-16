@@ -11,3 +11,5 @@ catch (err) {
     console.error(err.message);
     process.exit(1);
 }
+
+//EXAMPLE: node ./tests/test.js ../log.js log Prince 12 chess command
