@@ -1,6 +1,6 @@
 import { configDotenv } from 'dotenv';
 import mongoose from 'mongoose';
-import { add_cloves, subtract_cloves, get_user, update_daily, get_last_daily, get_streak } from "./user_utils.js";
+import { add_cloves, subtract_cloves, get_user, update_daily, get_daily_info } from "./user_utils.js";
 import { MessageFlags, EmbedBuilder } from "discord.js";
 import config from './config.json' with { type: 'json' };
 import fs from "fs";
@@ -297,7 +297,7 @@ const donate_cloves = async (user_id, target_id, user_name, target_name, amount)
 
 const check_daily = async (discord_id) => {
     // When user uses the command, first we get last daily, if the diff between now and last daily is more than 24 hours, we update_daily with streak true, if not, then streak breaks
-    const daily_info = await get_last_daily(discord_id);
+    const daily_info = await get_daily_info(discord_id);
     const now = Date.now();
     const last_daily_time = (daily_info.last_daily !== null) ? daily_info.last_daily.getTime() : new Date(0).getTime();
     const difference = now - last_daily_time;
