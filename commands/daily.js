@@ -46,7 +46,7 @@ class Daily extends Command {
 
         if (success) {
             const embed = await getLeaderboard(emote_map, colors);
-            this.interaction.message.edit({
+            interaction.message.edit({
                 embeds: [embed],
                 components: interaction.message.components
             });
