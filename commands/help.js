@@ -1,4 +1,4 @@
-import Command from "./command.js";
+import Command from "./bases/command.js";
 
 class Help extends Command {
     async exec(args) {

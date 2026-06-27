@@ -1,4 +1,4 @@
-import Command from "./command.js";
+import Command from "./bases/command.js";
 import { place_bet } from "../interactions.js";
 import { MessageFlags } from "discord.js";
 

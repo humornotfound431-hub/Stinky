@@ -1,5 +1,5 @@
-import commandChannelPerms from "../cmdPerms.js";
-import config from '../config.json' with { type: 'json' };
+import commandChannelPerms from "../../cmdPerms.js";
+import config from '../../config.json' with { type: 'json' };
 
 const { emote_map, colors } = config;
 
@@ -17,7 +17,7 @@ class Command {
     constructor(args) {
         this.emote_map = emote_map;
         this.colors = colors;
-        this.customErrMsg = "";
+        this.customMsg = "";
     }
 
     async exec(args) {

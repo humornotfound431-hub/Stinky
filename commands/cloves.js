@@ -1,4 +1,4 @@
-import Command from "./command.js";
+import Command from "./bases/command.js";
 import { get_cloves } from "../interactions.js";
 
 class Cloves extends Command {
