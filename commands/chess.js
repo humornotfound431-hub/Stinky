@@ -1,11 +1,11 @@
-import Command from "./command.js";
 import { Chess_Game } from "../games/chess.js";
 import { MessageFlags, ActionRowBuilder, ButtonBuilder, ButtonStyle, AttachmentBuilder } from "discord.js";
+import Game from "./bases/game.js";
 
 let currentGame = null;
 let chessInstance = null;
 
-class Chess extends Command {
+class Chess extends Game {
     async exec(args) {
         chessInstance = this;
         this.interaction = args.interaction;
@@ -25,7 +25,8 @@ class Chess extends Command {
             return { success: false, message: msg };
         }
 
-        currentGame = new Chess_Game(this.interaction.user.id);
+        this.setCurrentGame(new Chess_Game(this.interaction.user.id));
+        this.startTimeout(300);
 
         currentGame.msg = await this.channel.send({
             embeds: [{
@@ -56,6 +57,14 @@ class Chess extends Command {
         });
 
         return { success: true, message: replyMsg };
+    }
+
+    getCurrentGame() {
+        return currentGame;
+    }
+
+    setCurrentGame(instance) {
+        currentGame = instance;
     }
 
     async handleAction(interaction, id) {
@@ -91,7 +100,7 @@ class Chess extends Command {
 
         const sameUser = currentGame.player1_id === this.interaction.user.id;
 
-        if (currentGame.player2 || sameUser) {
+        if (currentGame.player2_id || sameUser) {
             const msg = sameUser ? "Cant play by yourself...yet" : "A Game already started";
             await this.interaction.reply({
                 embeds: [{
@@ -124,6 +133,8 @@ class Chess extends Command {
                     .setStyle(ButtonStyle.Danger)
             )
         ];
+
+        this.resetTimeout(1800); //1800 seconds, 30 min
 
         const attachment = new AttachmentBuilder(
             currentGame.boardBuffer,
@@ -195,6 +206,8 @@ class Chess extends Command {
             components: [row1, row2]
         });
 
+        this.resetTimeout(1800); //1800 seconds, 30 min
+
         return { success: true, message: replyMsg };
     }
 
@@ -257,6 +270,8 @@ class Chess extends Command {
             flags: MessageFlags.Ephemeral
         });
 
+        this.resetTimeout(1800); //1800 seconds, 30 min
+
         return { success: true, message: replyMsg };
     }
 
@@ -306,6 +321,8 @@ class Chess extends Command {
             }],
             flags: MessageFlags.Ephemeral
         });
+
+        clearTimeout(this.timeout);
 
         return { success: true, message: replyMsg };
     }
@@ -373,6 +390,8 @@ class Chess extends Command {
             components: buttons
         });
 
+        this.resetTimeout(1800); //1800 seconds, 30 min
+
         return { success: true, message: replyMsg };
     }
 
@@ -412,6 +431,9 @@ class Chess extends Command {
                 }],
                 files: [attachment]
             });
+
+            clearTimeout(this.timeout);
+
             return { success: true, message: gameOverInfo.title };
         }
 
@@ -450,6 +472,8 @@ class Chess extends Command {
             }],
             flags: MessageFlags.Ephemeral
         });
+
+        this.resetTimeout(1800); //1800 seconds, 30 min
 
         return { success: true, message };
     }
@@ -506,6 +530,7 @@ class Chess extends Command {
 
             currentGame.game.reset();
             currentGame = null;
+            clearTimeout(this.timeout);
         }
         else if (drawId === "refuse") { 
             let buttons = [
@@ -540,6 +565,8 @@ class Chess extends Command {
                 files: [attachment],
                 components: buttons
             });
+
+            this.resetTimeout(1800); //1800 seconds, 30 min
         }
 
         const replyMsg = "Handled Draw";

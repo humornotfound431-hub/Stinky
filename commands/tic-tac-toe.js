@@ -1,11 +1,11 @@
-import Command from "./command.js";
 import { MessageFlags, ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
 import TicTacToe from "../games/tictactoe.js";
+import Game from "./bases/game.js";
 
 let currentGame = null;
 let tttInstance;
 
-class Tic_Tac_Toe extends Command {
+class Tic_Tac_Toe extends Game {
     async exec(args) {
         this.interaction = args.interaction;
         const client = args.client;
@@ -23,6 +23,16 @@ class Tic_Tac_Toe extends Command {
         else if (sub === "end") {
             await this.end();
         }
+
+        return {success: true};
+    }
+
+    getCurrentGame() {
+        return currentGame;
+    }
+
+    setCurrentGame(instance) {
+        currentGame = instance;
     }
 
     async checkCurrentGame() {
@@ -54,7 +64,8 @@ class Tic_Tac_Toe extends Command {
             });
         }
 
-        currentGame = new TicTacToe(this.interaction.user.id, amount);
+        this.setCurrentGame(new TicTacToe(this.interaction.user.id, amount));
+        this.startTimeout(300);
 
         currentGame.msg = await this.channel.send({
             embeds: [{
@@ -82,6 +93,8 @@ class Tic_Tac_Toe extends Command {
 
         currentGame.player2_id = this.interaction.user.id;
         await currentGame.start();
+
+        this.resetTimeout(1800); //1800 seconds, 30 min
 
         let buttons = [];
         for (let row_index = 0; row_index < currentGame.board.length; row_index++) {
@@ -120,7 +133,8 @@ class Tic_Tac_Toe extends Command {
         if (!(await this.checkCurrentGame(this.interaction))) return;
 
         currentGame = null;
-
+        clearTimeout(this.timeout);
+        
         await this.interaction.reply({
             embeds: [{
                 title: `${this.interaction.user} ended the game ${this.emote_map.bigbrain}`,
@@ -165,15 +179,19 @@ class Tic_Tac_Toe extends Command {
         if (winner) {
             desc += `\n\n🏆 Winner: <@${winner}>`;
             currentGame = null;
+            clearTimeout(this.timeout);
         }
         else if (draw) {
             desc += `\n\n🤝 Draw`;
             currentGame = null;
+            clearTimeout(this.timeout);
         }
         else {
             desc = `<@${currentGame.player1_id}>: ${currentGame.id_to_symbol[currentGame.player1_id]}\n` +
                     `<@${currentGame.player2_id}>: ${currentGame.id_to_symbol[currentGame.player2_id]}\n\n` +
                     `**Turn:** <@${currentGame.turn}>\n\n`;
+
+            this.resetTimeout(1800); //1800 seconds, 30 min
         }
 
         await msg.edit({
