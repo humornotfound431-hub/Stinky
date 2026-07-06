@@ -25,6 +25,27 @@ class Chess extends Game {
             return { success: false, message: msg };
         }
 
+        this.buttons = [
+            new ActionRowBuilder().addComponents(
+                new ButtonBuilder()
+                    .setCustomId("chess:reload")
+                    .setLabel("Reload")
+                    .setStyle(ButtonStyle.Secondary),
+                new ButtonBuilder()
+                    .setCustomId("chess:piece_select")
+                    .setLabel("Select Piece")
+                    .setStyle(ButtonStyle.Secondary),
+                new ButtonBuilder()
+                    .setCustomId("chess:draw")
+                    .setLabel("Draw")
+                    .setStyle(ButtonStyle.Primary),
+                new ButtonBuilder()
+                    .setCustomId("chess:resign")
+                    .setLabel("Resign")
+                    .setStyle(ButtonStyle.Danger)
+            )
+        ];
+
         this.setCurrentGame(new Chess_Game(this.interaction.user.id));
         this.startTimeout(300);
 
@@ -59,6 +80,21 @@ class Chess extends Game {
         return { success: true, message: replyMsg };
     }
 
+    async checkCurrentGame() {
+        if (currentGame) return true;
+
+        await this.interaction.reply({
+            embeds: [{
+                title: `No game running right now ${this.emote_map.sweat_1}`,
+                color: this.colors["RED"]
+            }],
+
+            flags: MessageFlags.Ephemeral
+        });
+
+        return false;
+    };
+
     getCurrentGame() {
         return currentGame;
     }
@@ -82,21 +118,42 @@ class Chess extends Game {
         else if (id === "resign") {
             return await this.resign();
         }
+        else if (id === "reload") {
+            return await this.reload();
+        }
+    }
+
+    async reload() {
+        const currentGameExists = await this.checkCurrentGame();
+        if (!currentGameExists) return currentGameExists;
+
+        const attachment = new AttachmentBuilder(
+            currentGame.boardBuffer,
+            { name: "board.png" }
+        );
+
+        await currentGame.msg.edit({
+            embeds: [{
+                title: "Chess",
+                description:
+                    `<@${currentGame.player1_id}>: ${currentGame.getColorName(currentGame.player1_id)}\n` +
+                    `<@${currentGame.player2_id}>: ${currentGame.getColorName(currentGame.player2_id)}\n\n` +
+                    `**Turn:** <@${currentGame.symbol_to_id[currentGame.game.turn()]}>\n\n`,
+                color: this.colors["GARLIC"],
+                image: {
+                    url: "attachment://board.png"
+                }
+            }],
+            files: [attachment],
+            components: this.buttons
+        });
+
+        return { success: true, message: "Reloaded" };
     }
 
     async join() {
-        if (!currentGame) {
-            const msg = `No game running right now ${this.emote_map.sweat_1}`;
-            await this.interaction.reply({
-                embeds: [{
-                    title: msg,
-                    color: this.colors["RED"]
-                }],
-                flags: MessageFlags.Ephemeral
-            });
-            this.customErrMsg = msg;
-            return { success: false, message: msg };
-        }
+        const currentGameExists = await this.checkCurrentGame();
+        if (!currentGameExists) return currentGameExists;
 
         const sameUser = currentGame.player1_id === this.interaction.user.id;
 
@@ -116,23 +173,6 @@ class Chess extends Game {
 
         currentGame.player2_id = this.interaction.user.id;
         await currentGame.start();
-
-        let buttons = [
-            new ActionRowBuilder().addComponents(
-                new ButtonBuilder()
-                    .setCustomId("chess:piece_select")
-                    .setLabel("Select Piece")
-                    .setStyle(ButtonStyle.Secondary),
-                new ButtonBuilder()
-                    .setCustomId("chess:draw")
-                    .setLabel("Draw")
-                    .setStyle(ButtonStyle.Primary),
-                new ButtonBuilder()
-                    .setCustomId("chess:resign")
-                    .setLabel("Resign")
-                    .setStyle(ButtonStyle.Danger)
-            )
-        ];
 
         this.resetTimeout(1800); //1800 seconds, 30 min
 
@@ -154,7 +194,7 @@ class Chess extends Game {
                 }
             }],
             files: [attachment],
-            components: buttons
+            components: this.buttons
         });
 
         const replyMsg = "Joined the game";
@@ -170,19 +210,8 @@ class Chess extends Game {
     }
 
     async pieceSelect() {
-        if (!currentGame) {
-            const msg = `No game running right now ${this.emote_map.sweat_1}`;
-            await this.interaction.reply({
-                embeds: [{
-                    title: msg,
-                    color: this.colors["RED"]
-                }],
-                flags: MessageFlags.Ephemeral
-            });
-
-            this.customErrMsg = msg;
-            return { success: false, message: msg };
-        }
+        const currentGameExists = await this.checkCurrentGame();
+        if (!currentGameExists) return currentGameExists;
 
         const row1 = new ActionRowBuilder().addComponents(
             new ButtonBuilder().setCustomId('chess_moves:k').setLabel('♔ King').setStyle(ButtonStyle.Secondary),
@@ -212,19 +241,8 @@ class Chess extends Game {
     }
 
     async draw() {
-        if (!currentGame) {
-            const msg = `No game running right now ${this.emote_map.sweat_1}`;
-            await this.interaction.reply({
-                embeds: [{
-                    title: msg,
-                    color: this.colors["RED"]
-                }],
-                flags: MessageFlags.Ephemeral
-            });
-
-            this.customErrMsg = msg;
-            return { success: false, message: msg };
-        }
+        const currentGameExists = await this.checkCurrentGame();
+        if (!currentGameExists) return currentGameExists;
 
         currentGame.draw_offer = this.interaction.user.id;
 
@@ -276,19 +294,8 @@ class Chess extends Game {
     }
 
     async resign() {
-        if (!currentGame) {
-            const msg = `No game running right now ${this.emote_map.sweat_1}`;
-            await this.interaction.reply({
-                embeds: [{
-                    title: msg,
-                    color: this.colors["RED"]
-                }],
-                flags: MessageFlags.Ephemeral
-            });
-
-            this.customErrMsg = msg;
-            return { success: false, message: msg };
-        }
+        const currentGameExists = await this.checkCurrentGame();
+        if (!currentGameExists) return currentGameExists;
 
         const attachment = new AttachmentBuilder(
             currentGame.boardBuffer,
@@ -330,19 +337,8 @@ class Chess extends Game {
     async handlePieceSelect(interaction, pieceId) {
         this.interaction = interaction;
         
-        if (!currentGame) {
-            const msg = `No game running right now ${this.emote_map.sweat_1}`;
-            await this.interaction.reply({
-                embeds: [{
-                    title: msg,
-                    color: this.colors["RED"]
-                }],
-                flags: MessageFlags.Ephemeral
-            });
-
-            this.customErrMsg = msg;
-            return { success: false, message: msg };
-        }
+        const currentGameExists = await this.checkCurrentGame();
+        if (!currentGameExists) return currentGameExists;
 
         const moves = currentGame.game.moves({ verbose: true }).filter(move => move.piece === pieceId);
         let row = new ActionRowBuilder();
@@ -398,19 +394,8 @@ class Chess extends Game {
     async handleMove(interaction, moveId) {
         this.interaction = interaction;
         
-        if (!currentGame) {
-            const msg = `No game running right now ${this.emote_map.sweat_1}`;
-            await this.interaction.reply({
-                embeds: [{
-                    title: msg,
-                    color: this.colors["RED"]
-                }],
-                flags: MessageFlags.Ephemeral
-            });
-
-            this.customErrMsg = msg;
-            return { success: false, message: msg };
-        }
+        const currentGameExists = await this.checkCurrentGame();
+        if (!currentGameExists) return currentGameExists;
 
         const {success, message, isGameOver, gameOverInfo} = await currentGame.make_move(interaction.user.id, moveId);
         
@@ -481,19 +466,8 @@ class Chess extends Game {
     async handleDraw(interaction, drawId) {
         this.interaction = interaction;
         
-        if (!currentGame) {
-            const msg = `No game running right now ${this.emote_map.sweat_1}`;
-            await this.interaction.reply({
-                embeds: [{
-                    title: msg,
-                    color: this.colors["RED"]
-                }],
-                flags: MessageFlags.Ephemeral
-            });
-
-            this.customErrMsg = msg;
-            return { success: false, message: msg };
-        }
+        const currentGameExists = await this.checkCurrentGame();
+        if (!currentGameExists) return currentGameExists;
 
         let deciderId = (currentGame.player1_id === currentGame.draw_offer) ? currentGame.player2_id : currentGame.player1_id;
         if (interaction.user.id !== deciderId) {
@@ -534,23 +508,6 @@ class Chess extends Game {
             clearTimeout(this.timeout);
         }
         else if (drawId === "refuse") { 
-            let buttons = [
-                new ActionRowBuilder().addComponents(
-                    new ButtonBuilder()
-                        .setCustomId("chess:piece_select")
-                        .setLabel("Select Piece")
-                        .setStyle(ButtonStyle.Secondary),
-                    new ButtonBuilder()
-                        .setCustomId("chess:draw")
-                        .setLabel("Draw")
-                        .setStyle(ButtonStyle.Primary),
-                    new ButtonBuilder()
-                        .setCustomId("chess:resign")
-                        .setLabel("Resign")
-                        .setStyle(ButtonStyle.Danger)
-                )
-            ];
-
             await currentGame.msg.edit({
                 embeds: [{
                     title: "Chess",
@@ -564,7 +521,7 @@ class Chess extends Game {
                     }
                 }],
                 files: [attachment],
-                components: buttons
+                components: this.buttons
             });
 
             this.resetTimeout(1800); //1800 seconds, 30 min
