@@ -495,7 +495,8 @@ class Chess extends Game {
             return { success: false, message: msg };
         }
 
-        if (interaction.user.id === currentGame.draw_offer) {
+        let deciderId = (currentGame.player1_id === currentGame.draw_offer) ? currentGame.player2_id : currentGame.player1_id;
+        if (interaction.user.id !== deciderId) {
             const msg = `You can't decide for them y'know ${this.emote_map.sweat_1}`;
             await this.interaction.reply({
                 embeds: [{
