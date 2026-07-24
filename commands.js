@@ -34,6 +34,10 @@ const batteryCommands = [
             .setDescription("Check how many batteries you have"),
         
         new SlashCommandBuilder()
+            .setName("help")
+            .setDescription("List all commands"),
+
+        new SlashCommandBuilder()
             .setName("donate")
             .setDescription("Donate batteries to the people in need :')")
             .addUserOption(option => 
