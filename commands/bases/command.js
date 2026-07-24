@@ -15,7 +15,7 @@ class Command {
     }
 
     constructor(args) {
-        this.emote_map = emote_map;
+        this.emote_map = emote_map[args.interaction.botName];
         this.colors = colors;
         this.customMsg = "";
     }

@@ -1,0 +1,19 @@
+Unit tests -
+
+    Any kind of function that needs to console I/O
+    Return funcions output to console as well
+    Call function from console with args like "test Func_name [Args]"
+    The function will have to loaded so it can be "test File_path Func_name [args]"
+    How can test file access the function from file, there will be export called tests which will hold the function ref
+
+16 June:
+    Modularize project
+    perma logging
+
+5 July:
+    Chess reload button
+    draw by any other person bug
+
+22 July:
+    Add ability to customize name, pfp per server
+    Update Games so that there is one per server

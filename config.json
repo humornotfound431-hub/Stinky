@@ -4,19 +4,32 @@
         "garlic-gambling": "1498160688714219630",
         "bot-setup": "1488828451833122948",
         "test-server-general": "1488407905580351600",
-        "daily-cloves": "1507286121162473533"
+        "daily-cloves": "1507286121162473533",
+        "gamba": "1530205960348504074",
+        "gaming": "1530207501323079812"
     },
     "colors": {"RED": 15037299, "GARLIC": 12902821},
     "emote_map": {
-        "crying": "<:crying:1493445299815845958>",
-        "smug": "<:smug:1493445462081142976>",
-        "SmugGarlic": "<:SmugGarlic:1487998783924076754>",
-        "heart_1": "<:heart_1:1493445209537777684>",
-        "peek": "<:peek:1493445431869313194>",
-        "bigbrain": "<:bigbrain:1496294871416438895>",
-        "sweat_1": "<:sweat_1:1493445506020544652>",
-        "blob": "<:blob:1493445267238948924>",
-        "ha": "<:ha:1493445374273130547>"
+        "garlic": {
+            "crying": "<:crying:1493445299815845958>",
+            "smug": "<:smug:1493445462081142976>",
+            "SmugGarlic": "<:SmugGarlic:1487998783924076754>",
+            "heart_1": "<:heart_1:1493445209537777684>",
+            "peek": "<:peek:1493445431869313194>",
+            "bigbrain": "<:bigbrain:1496294871416438895>",
+            "sweat_1": "<:sweat_1:1493445506020544652>",
+            "blob": "<:blob:1493445267238948924>",
+            "ha": "<:ha:1493445374273130547>"
+        },
+
+        "battery": {
+            "GoonerRheo": "<:GoonerRheo:1505798775451684885>",
+            "HappyRheo": "<:HappyRheo:1505803800819011654>",
+            "JimothyCricketSmol": "<:JimothyCricketSmol:1505799674307547186>",
+            "KAPPARHEO": "<:KAPPARHEO:1505799073888731137>",
+            "KAPPARHEOBALD": "<:KAPPARHEOBALD:1505799147461279787>",
+            "SadRheo": "<:SadRheo:1505798884494934168>"
+        }
     },
     "images": {
         "roulette_gif": "https://i.postimg.cc/nrHPdnPf/roulette.gif",

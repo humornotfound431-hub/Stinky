@@ -1,5 +1,5 @@
 import Command from "./bases/command.js";
-import { donate_cloves } from "../interactions.js";
+import { donate_currency } from "../interactions.js";
 
 class Donate extends Command {
     async exec(args) {

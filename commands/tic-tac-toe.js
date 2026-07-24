@@ -8,6 +8,7 @@ let tttInstance;
 class Tic_Tac_Toe extends Game {
     async exec(args) {
         this.interaction = args.interaction;
+        this.botName = this.interaction.botName;
         const client = args.client;
         tttInstance = this;
 
@@ -38,9 +39,10 @@ class Tic_Tac_Toe extends Game {
     async checkCurrentGame() {
         if (currentGame) return true;
 
+        const emote = this.botName === "garlic" ? this.emote_map.sweat_1 : this.emote_map.Rheogooglyeyes;
         await this.interaction.reply({
             embeds: [{
-                title: `No game running right now ${this.emote_map.sweat_1}`,
+                title: `No game running right now ${emote}`,
                 color: this.colors["RED"]
             }],
 
@@ -53,10 +55,11 @@ class Tic_Tac_Toe extends Game {
     async start() {
         const amount = this.interaction.options.getInteger("amount") || null;
 
+        let emote = this.botName === "garlic" ? this.emote_map.peek : this.emote_map.Rheogooglyeyes;
         if (currentGame) {
             return await this.interaction.reply({
                 embeds: [{
-                    title: `A game is already running ${this.emote_map.peek}`,
+                    title: `A game is already running ${emote}`,
                     color: this.colors["RED"]
                 }],
 
@@ -67,12 +70,14 @@ class Tic_Tac_Toe extends Game {
         this.setCurrentGame(new TicTacToe(this.interaction.user.id, amount));
         this.startTimeout(300);
 
+        emote = this.botName === "garlic" ? this.emote_map.peek : this.emote_map.Rheogooglyeyes;
+        const currencyName = this.botName === "garlic" ? "cloves" : "batteries";
         currentGame.msg = await this.channel.send({
             embeds: [{
                 title: "Tic Tac Toe Challenge",
                 description:
-                    `${this.interaction.user} started a Tic Tac Toe game ${this.emote_map.peek}\n\n` +
-                    `💰 **Wager:** ${currentGame.amount} cloves\n\n` +
+                    `${this.interaction.user} started a Tic Tac Toe game ${emote}\n\n` +
+                    `💰 **Wager:** ${currentGame.amount} ${currencyName}\n\n` +
                     `Use \`/tic-tac-toe join\` to join the game!`,
                 color: this.colors["GARLIC"],
             }]
@@ -135,9 +140,10 @@ class Tic_Tac_Toe extends Game {
         currentGame = null;
         clearTimeout(this.timeout);
         
+        const emote = this.botName === "garlic" ? this.emote_map.bigbrain : this.emote_map.RheoShock;
         await this.interaction.reply({
             embeds: [{
-                title: `${this.interaction.user} ended the game ${this.emote_map.bigbrain}`,
+                title: `${this.interaction.user} ended the game ${emote}`,
                 color: this.colors["RED"]
             }]
         });
@@ -146,7 +152,8 @@ class Tic_Tac_Toe extends Game {
     async make_move(interaction, buttonId) {
         this.interaction = interaction;
 
-        if (!(await this.checkCurrentGame(this.interaction))) return {success: false, message: `No game running right now ${this.emote_map.sweat_1}`};
+        const emote = this.botName === "garlic" ? this.emote_map.sweat_1 : this.emote_map.Rheogooglyeyes;
+        if (!(await this.checkCurrentGame(this.interaction))) return {success: false, message: `No game running right now ${emote}`};
         
         const {success, message, winner, draw, board} = await currentGame.place_mark(this.interaction.user.id, Number(buttonId));
 

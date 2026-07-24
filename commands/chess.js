@@ -11,10 +11,13 @@ class Chess extends Game {
         this.interaction = args.interaction;
         const client = args.client;
 
+        this.botName = this.interaction.botName;
+
         this.channel = await client.channels.fetch(this.interaction.channelId);
 
         if (currentGame) {
-            const msg = `A game is already running ${this.emote_map.peek}`;
+            const emote = this.botName === "garlic" ? this.emote_map.peek : this.emote_map.Rheogooglyeyes;
+            const msg = `A game is already running ${emote}`;
             await this.interaction.reply({
                 embeds: [{
                     title: msg,
@@ -49,11 +52,12 @@ class Chess extends Game {
         this.setCurrentGame(new Chess_Game(this.interaction.user.id));
         this.startTimeout(300);
 
+        let emote = this.botName === "garlic" ? this.emote_map.peek : this.emote_map.Rheo_Cozy;
         currentGame.msg = await this.channel.send({
             embeds: [{
                 title: "Chess Challenge",
                 description:
-                    `${this.interaction.user} started a Chess game ${this.emote_map.peek}\n\n` +
+                    `${this.interaction.user} started a Chess game ${emote}\n\n` +
                     `Use the button below to join!!`,
                 color: this.colors["GARLIC"],
             }],
@@ -83,9 +87,10 @@ class Chess extends Game {
     async checkCurrentGame() {
         if (currentGame) return true;
 
+        const emote = this.botName === "garlic" ? this.emote_map.sweat_1 : this.emote_map.Rheogooglyeyes;
         await this.interaction.reply({
             embeds: [{
-                title: `No game running right now ${this.emote_map.sweat_1}`,
+                title: `No game running right now ${emote}`,
                 color: this.colors["RED"]
             }],
 
@@ -471,7 +476,8 @@ class Chess extends Game {
 
         let deciderId = (currentGame.player1_id === currentGame.draw_offer) ? currentGame.player2_id : currentGame.player1_id;
         if (interaction.user.id !== deciderId) {
-            const msg = `You can't decide for them y'know ${this.emote_map.sweat_1}`;
+            const emote = this.botName === "garlic" ? this.emote_map.sweat_1 : this.emote_map.Rheogooglyeyes;
+            const msg = `You can't decide for them y'know ${emote}`;
             await this.interaction.reply({
                 embeds: [{
                     title: msg,

@@ -17,7 +17,7 @@ const get_user = async (discord_id) => {
     }
 };
 
-const add_cloves = async (discord_id, amount, session = null) => {
+const add_currency = async (discord_id, amount, session = null) => {
     return await User.findOneAndUpdate(
         { discord_id },
         { $inc: { cloves: amount } },
@@ -25,7 +25,7 @@ const add_cloves = async (discord_id, amount, session = null) => {
     );
 };
 
-const subtract_cloves = async (discord_id, amount, session = null) => {
+const subtract_currency = async (discord_id, amount, session = null) => {
     return await User.findOneAndUpdate(
         { discord_id },
         [{ $set: { cloves: { $max:  [ { $subtract: ["$cloves", amount] }, 0] } } }],
@@ -67,8 +67,8 @@ const get_sorted_streaks = async () => {
 
 export {
     get_user,
-    add_cloves,
-    subtract_cloves,
+    add_currency,
+    subtract_currency,
     update_daily,
     get_daily_info,
     get_sorted_streaks

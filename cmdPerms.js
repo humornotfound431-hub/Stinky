@@ -13,13 +13,13 @@ const commandChannelPerms = new Map([
     ["ping", null],
     ["random_joke", null],
     ["daily", new Set([channels['daily-cloves'], channels['test-server-general']])],    
-    ["bet", new Set([channels['garlic-gambling'], channels['bot-setup'], channels['test-server-general']])],
+    ["bet", new Set([channels['garlic-gambling'], channels['bot-setup'], channels['test-server-general'], channels["gamba"]])],
     ["slots", new Set([channels['garlic-gambling'], channels['bot-setup'], channels['test-server-general']])],
-    ["cloves", new Set([channels['garlic-gaming'], channels['garlic-gambling'], channels['bot-setup'], channels['test-server-general']])],
-    ["donate", new Set([channels['garlic-gaming'], channels['garlic-gambling'], channels['bot-setup'], channels['test-server-general']])],
+    ["cloves", new Set([channels['garlic-gaming'], channels['garlic-gambling'], channels['bot-setup'], channels['test-server-general'], channels["gamba"]])],
+    ["donate", new Set([channels['garlic-gaming'], channels['garlic-gambling'], channels['bot-setup'], channels['test-server-general'], channels["gamba"]])],
     ["help", null],
-    ["tic-tac-toe", new Set([channels['garlic-gaming'], channels['bot-setup'], channels['test-server-general']])],
-    ["chess", new Set([channels["garlic-gaming"], channels["test-server-general"]])]
+    ["tic-tac-toe", new Set([channels['garlic-gaming'], channels['bot-setup'], channels['test-server-general'], channels["gaming"]])],
+    ["chess", new Set([channels["garlic-gaming"], channels["test-server-general"], channels["gaming"]])]
 ]);
 
 export default commandChannelPerms;

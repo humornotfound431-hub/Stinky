@@ -1,4 +1,4 @@
-import { get_user, add_cloves, subtract_cloves } from "../user_utils.js";
+import { get_user, add_currency, subtract_currency } from "../user_utils.js";
 import config from "../config.json" with { type: "json" };
 
 const { emote_map } = config;
@@ -45,8 +45,8 @@ class TicTacToe {
 
         if (this.check_win()) {
             if (this.bet !== null) {
-                await add_cloves(this.winner, this.bet);
-                await subtract_cloves(this.winner === this.player1_id ? this.player1_id : this.player2_id, this.bet);
+                await add_currency(this.winner, this.bet);
+                await subtract_currency(this.winner === this.player1_id ? this.player1_id : this.player2_id, this.bet);
             }
             return {success: true, winner: this.winner, board: this.board};
         }

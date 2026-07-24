@@ -1,6 +1,6 @@
 import { Chess } from "chess.js";
 import fs from "fs";
-import { get_user, add_cloves, subtract_cloves } from "../user_utils.js";
+import { get_user, add_currency, subtract_currency } from "../user_utils.js";
 import config from "../config.json" with { type: "json" };
 import sharp from "sharp";
 
