@@ -1,4 +1,4 @@
-import { REST, Routes, SlashCommandBuilder } from "discord.js";
+import { REST, Routes, SlashCommandBuilder, PermissionFlagsBits } from "discord.js";
 import { configDotenv } from 'dotenv';
 
 configDotenv();
@@ -33,6 +33,11 @@ const batteryCommands = [
             .setName("batteries")
             .setDescription("Check how many batteries you have"),
         
+        new SlashCommandBuilder()
+            .setName("intermission-thread")
+            .setDescription("Get da vids in the thing and the thing n stuff")
+            .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+
         new SlashCommandBuilder()
             .setName("help")
             .setDescription("List all commands"),

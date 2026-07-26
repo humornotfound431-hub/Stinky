@@ -16,6 +16,7 @@ import { Donate } from './commands/donate.js';
 import { Tic_Tac_Toe, tttInstance } from './commands/tic-tac-toe.js';
 import { Chess, chessInstance } from './commands/chess.js';
 import { Help } from './commands/help.js';
+import { IntermissionThread } from "./commands/interactionThread.js";
 
 import mongoose from 'mongoose';
 import config from './config.json' with { type: 'json' };
@@ -255,6 +256,9 @@ const battery_interaction = async (interaction, client) => {
                 break;
             case "help":
                 interactionReply = await Help.init({ interaction });
+                break;
+            case "intermission-thread":
+                interactionReply = await IntermissionThread.init({ interaction, client });
                 break;
         }
     }

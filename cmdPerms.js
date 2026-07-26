@@ -19,7 +19,8 @@ const commandChannelPerms = new Map([
     ["donate", new Set([channels['garlic-gaming'], channels['garlic-gambling'], channels['bot-setup'], channels['test-server-general'], channels["gamba"]])],
     ["help", null],
     ["tic-tac-toe", new Set([channels['garlic-gaming'], channels['bot-setup'], channels['test-server-general'], channels["gaming"]])],
-    ["chess", new Set([channels["garlic-gaming"], channels["test-server-general"], channels["gaming"]])]
+    ["chess", new Set([channels["garlic-gaming"], channels["test-server-general"], channels["gaming"]])],
+    ["intermission-videos", null]
 ]);
 
 export default commandChannelPerms;
