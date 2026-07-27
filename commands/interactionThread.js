@@ -22,6 +22,8 @@ class IntermissionThread extends Command {
             );
         }
 
+        const durationSec = 60 * 90;
+
         const date = new Date().toLocaleDateString("en-GB", {
             day: "numeric",
             month: "short",
@@ -34,7 +36,7 @@ class IntermissionThread extends Command {
                 content: 'This is the where the things go in the thing, I think'
             },
             autoArchiveDuration: 60,
-            rateLimitPerUser: 369 // 6 * 60 + 9
+            rateLimitPerUser: durationSec
         });
 
         const archived = await forumChannel.threads.fetchArchived();
@@ -51,7 +53,7 @@ class IntermissionThread extends Command {
             } catch (err) {
                 console.error(err);
             }
-        }, 6 * 60 * 1000 + 9 * 1000);
+        }, durationSec * 1000);
 
         await interaction.editReply({ content: "I did it boss" });
         return { success: true, message: "Did the thing" };
