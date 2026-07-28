@@ -31,7 +31,7 @@ class IntermissionThread extends Command {
         });
 
         const post = await forumChannel.threads.create({
-            name: `Intermission Videos (${date})`,
+            name: `Intermission Stuff (${date})`,
             message: {
                 content: 'This is the where the things go in the thing, I think'
             },
