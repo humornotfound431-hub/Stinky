@@ -321,7 +321,7 @@ const donate_currency = async (user_id, target_id, user_name, target_name, amoun
     }
 };
 
-const check_daily = async (discord_id) => {
+const check_daily = async (discord_id, botName) => {
     // When user uses the command, first we get last daily, if the diff between now and last daily is more than 24 hours, we update_daily with streak true, if not, then streak breaks
     const daily_info = await get_daily_info(discord_id);
     const now = Date.now();
@@ -335,7 +335,8 @@ const check_daily = async (discord_id) => {
         const hours = Math.floor(time_remaining / (1000 * 60 * 60));
         const minutes = Math.floor((time_remaining % (1000 * 60 * 60)) / (1000 * 60));
 
-        return {success: false, message: `Cannot check in. Try again in ${hours}h ${minutes}m ${emote_map["garlic"].heart_1}`};
+        let emote = botName === "garlic" ? emote_map[botName].heart_1 : emote_map[botName].SadRheo;
+        return {success: false, message: `Cannot check in. Try again in ${hours}h ${minutes}m ${emote}`};
     }
 
     const session = await mongoose.startSession();
@@ -363,12 +364,14 @@ const check_daily = async (discord_id) => {
         await add_currency(discord_id, amount, session);
 
         await session.commitTransaction();
-        return {success: true, message: `Here's your daily check in cloves ${emote_map["garlic"].smug}`, streak, amount};
+        let emote = botName === "garlic" ? emote_map[botName].smug : emote_map[botName].KAPPARHEO;
+        return {success: true, message: `Here's your daily check in cloves ${emote}`, streak, amount};
     }
     catch (err) {
         await session.abortTransaction();
         console.error("[ERROR]", err.message);
-        return {success: false, message: `Some stoopid error occured ${emote_map["garlic"].crying}`};
+        let emote = botName === "garlic" ? emote_map[botName].crying : emote_map[botName].SadRheo;
+        return {success: false, message: `Some stoopid error occured ${emote}`};
     }
     finally {
         session.endSession();

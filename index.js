@@ -204,6 +204,11 @@ const battery_interaction = async (interaction, client) => {
                     interactionReply = await chessInstance.handleAction(interaction, id);
                 }
                 break;
+            case "daily":
+                if (id === "claim") {
+                    interactionReply = await Daily.claim(interaction, emote_map["battery"], colors);
+                }
+                break;
             case "chess_moves":
                 if (chessInstance) {
                     interactionReply = await chessInstance.handlePieceSelect(interaction, id);

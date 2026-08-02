@@ -44,15 +44,13 @@ class Daily extends Command {
 
     static async claim(interaction, emote_map, colors) {
         await interaction.deferReply({flags: MessageFlags.Ephemeral});
-        const {success, message, streak, amount} = await check_daily(interaction.user.id);
+        const {success, message, streak, amount} = await check_daily(interaction.user.id, interaction.botName);
 
-        if (success) {
-            const embed = await getLeaderboard(emote_map, colors, interaction.guildId, interaction.botName);
-            interaction.message.edit({
-                embeds: [embed],
-                components: interaction.message.components
-            });
-        }
+        const embed = await getLeaderboard(emote_map, colors, interaction.guildId, interaction.botName);
+        interaction.message.edit({
+            embeds: [embed],
+            components: interaction.message.components
+        });
 
         await interaction.editReply({
             embeds: [{
