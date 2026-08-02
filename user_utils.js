@@ -61,8 +61,8 @@ const update_daily = async (discord_id, streak, session = null) => {
     );
 };
 
-const get_sorted_streaks = async () => {
-    return await User.find().select("discord_id streak_daily").sort({ streak_daily: -1 }).limit(10);
+const get_sorted_streaks = async (guildId) => {
+    return await User.find({ guilds: guildId }).select("discord_id streak_daily").sort({ streak_daily: -1 }).limit(10);
 };
 
 export {

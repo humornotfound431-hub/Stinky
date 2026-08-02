@@ -6,6 +6,8 @@ import {
     MessageFlags
 } from 'discord.js';
 
+import User from './models/user.js';
+
 import { Ping } from "./commands/ping.js";
 import { Daily } from './commands/daily.js';
 import { Joke } from './commands/joke.js';
@@ -259,6 +261,9 @@ const battery_interaction = async (interaction, client) => {
                 break;
             case "intermission-thread":
                 interactionReply = await IntermissionThread.init({ interaction, client });
+                break;
+            case "daily":
+                interactionReply = await Daily.init({ interaction });
                 break;
         }
     }

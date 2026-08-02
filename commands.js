@@ -41,6 +41,10 @@ const batteryCommands = [
         new SlashCommandBuilder()
             .setName("help")
             .setDescription("List all commands"),
+        
+        new SlashCommandBuilder()
+            .setName("daily")
+            .setDescription("Sends the daily reward message"),
 
         new SlashCommandBuilder()
             .setName("donate")
@@ -102,7 +106,7 @@ const commands = [
     
     new SlashCommandBuilder()
         .setName("daily")
-        .setDescription("Sends the daily cloves message"),
+        .setDescription("Sends the daily reward message"),
     
     new SlashCommandBuilder()
         .setName("bet")

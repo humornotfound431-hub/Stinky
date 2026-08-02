@@ -12,7 +12,7 @@ const {channels} = config;
 const commandChannelPerms = new Map([
     ["ping", null],
     ["random_joke", null],
-    ["daily", new Set([channels['daily-cloves'], channels['test-server-general']])],    
+    ["daily", new Set([channels['daily-cloves'], channels['test-server-general'], channels["daily-battery"]])],    
     ["bet", new Set([channels['garlic-gambling'], channels['bot-setup'], channels['test-server-general'], channels["gamba"]])],
     ["slots", new Set([channels['garlic-gambling'], channels['bot-setup'], channels['test-server-general']])],
     ["cloves", new Set([channels['garlic-gaming'], channels['garlic-gambling'], channels['bot-setup'], channels['test-server-general'], channels["gamba"]])],

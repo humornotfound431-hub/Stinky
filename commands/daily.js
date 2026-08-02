@@ -3,17 +3,18 @@ import { get_sorted_streaks } from "../user_utils.js";
 import { check_daily } from "../interactions.js";
 import { MessageFlags, ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
 
-async function getLeaderboard(emote_map, colors) {
-    const leaderboard = await get_sorted_streaks();
+async function getLeaderboard(emote_map, colors, guildId, botName) {
+    const leaderboard = await get_sorted_streaks(guildId);
 
-    let desc = "Claim your daily cloves using the button below\n\n**Streak Leaderboard:**\n\n";
+    let desc = "Claim your daily reward using the button below\n\n**Streak Leaderboard:**\n\n";
 
     leaderboard.forEach((user, index) => {
         desc += `${index + 1}. <@${user.discord_id}>: ${user.streak_daily}\n`;
     });
 
+    const emote = botName === "garlic" ? emote_map.blob : emote_map.KAPPARHEO;
     return {
-        title: `${emote_map.blob} Daily Cloves ${emote_map.blob}`,
+        title: `${emote} Daily Reward ${emote}`,
         description: desc,
         color: colors["GARLIC"]
     };
@@ -22,10 +23,11 @@ async function getLeaderboard(emote_map, colors) {
 class Daily extends Command {
     async exec(args) {
         this.interaction = args.interaction;
+        const botName = this.interaction.botName;
 
         await this.interaction.deferReply({});
 
-        const embed = await getLeaderboard(this.emote_map, this.colors);
+        const embed = await getLeaderboard(this.emote_map, this.colors, this.interaction.guildId, botName);
 
         await this.interaction.editReply({
             embeds: [embed],
@@ -33,8 +35,8 @@ class Daily extends Command {
                 new ActionRowBuilder().addComponents(
                     new ButtonBuilder()
                         .setCustomId("daily:claim")
-                        .setEmoji("🧄")
-                        .setStyle(ButtonStyle.Success)
+                        .setEmoji(botName === "garlic" ? "🧄" : "🔋")
+                        .setStyle(ButtonStyle.Primary)
                 )
             ]
         });
@@ -45,7 +47,7 @@ class Daily extends Command {
         const {success, message, streak, amount} = await check_daily(interaction.user.id);
 
         if (success) {
-            const embed = await getLeaderboard(emote_map, colors);
+            const embed = await getLeaderboard(emote_map, colors, interaction.guildId, interaction.botName);
             interaction.message.edit({
                 embeds: [embed],
                 components: interaction.message.components
