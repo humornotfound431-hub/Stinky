@@ -11,7 +11,7 @@ class Donate extends Command {
         const target_member = interaction.options.getMember("user");
         const target_name = target_member?.displayName || target_member?.user.globalName || target_member?.user.username;
 
-        const {success, message} = await donate_currency(interaction.user.id, target_member.id, name, target_name, donate_amount);
+        const {success, message} = await donate_currency(interaction.user.id, target_member.id, name, target_name, donate_amount, interaction.botName);
 
         await interaction.editReply({
             embeds: [{

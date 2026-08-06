@@ -273,7 +273,7 @@ const play_slots = async (interaction, amount, botName) => {
     }
 };
 
-const donate_currency = async (user_id, target_id, user_name, target_name, amount) => {
+const donate_currency = async (user_id, target_id, user_name, target_name, amount, botName) => {
     const session = await mongoose.startSession();
     
     try {
