@@ -246,22 +246,28 @@ const play_slots = async (interaction, amount, botName) => {
             if (results[0] === "🧄") {
                 // const emote = botName === "garlic" ? emote_map[botName].crying : emote_map[botName].SadRheo;
                 changed *= 50;
-                message = `GARLIC JACKPOT!! ${emote_map.bigbrain}${emote_map.heart_1}${emote_map.smug}`;
+                const smug = botName === "garlic" ? emote_map[botName].smug : emote_map[botName].KAPPARHEO;
+                const happy = botName === "garlic" ? emote_map[botName].heart_1 : emote_map[botName].HappyRheo;
+                const bigBrain = botName === "garlic" ? emote_map[botName].JimothyCricketSmol : emote_map[botName].bigbrain;
+                message = `GARLIC JACKPOT!! ${bigbrain}${happy}${smug}`;
             }
             else {
                 changed *= 10;
-                message = `3 in a row, how lucky ${emote_map.smug}`;
+                const emote = botName === "garlic" ? emote_map[botName].smug : emote_map[botName].KAPPARHEO;
+                message = `3 in a row, how lucky ${emote}`;
             }
             await add_currency(interaction.user.id, changed);
         }
         else if (results[0] === results[1] || results[1] === results[2] || results[2] === results[0]) {
             changed = Math.floor(changed * 0.5);
-            message = `Nice luck! Have some ${currencyName} as reward ${emote_map.heart_1}`;
+            const emote = botName === "garlic" ? emote_map[botName].heart_1 : emote_map[botName].HappyRheo;
+            message = `Nice luck! Have some ${currencyName} as reward ${emote}`;
             await add_currency(interaction.user.id, changed);
         }
         else {
             await subtract_currency(interaction.user.id, changed);
-            message = `99% gamblers quit before they win big ${emote_map.smug}`;
+            const smug = botName === "garlic" ? emote_map[botName].smug : emote_map[botName].KAPPARHEO;
+            message = `99% gamblers quit before they win big ${smug}`;
             changed = -changed;
         }
 
@@ -269,7 +275,8 @@ const play_slots = async (interaction, amount, botName) => {
     }
     catch (err) {
         console.log(err.message);
-        return {success: false, message: `Some stoopid error occured ${emote_map.crying}`};
+        const emote = botName === "garlic" ? emote_map[botName].crying : emote_map[botName].SadRheo;
+        return {success: false, message: `Some stoopid error occured ${emote}`};
     }
 };
 
