@@ -39,7 +39,16 @@ const subtract_currency = async (discord_id, amount, session = null) => {
 };
 
 const get_daily_info = async (discord_id, session = null) => {
-    const daily_info = await User.findOne({ discord_id }, "last_daily streak_daily", { returnDocument: "after", upsert: true, session });
+    const daily_info = await User.findOneAndUpdate(
+        { discord_id },
+        { $setOnInsert: { discord_id } },
+        {
+            new: true,
+            upsert: true,
+            session
+        }
+    );
+
     return daily_info;
 }
 
