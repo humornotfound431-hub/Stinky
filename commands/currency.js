@@ -9,7 +9,7 @@ class Currency extends Command {
         const currencyName = botName === "garlic" ? "cloves" : "batteries";
 
         await interaction.deferReply();
-        const currency = await get_currency(interaction.user.id);
+        const currency = await get_currency({guildId: interaction.guildId, discord_id: interaction.user.id});
 
         const emote = botName === "garlic" ? this.emote_map.heart_1 : this.emote_map.HappyRheo;
         await interaction.editReply({

@@ -12,7 +12,7 @@ class Bet extends Command {
         const amount = interaction.options.getString("amount").toLowerCase();
         const choice = interaction.options.getString("choice").toLowerCase();
 
-        const {success, message} = await place_bet(amount, choice, channel, name, interaction.user.id, interaction.botName);
+        const {success, message} = await place_bet(amount, choice, channel, {name, discord_id: interaction.user.id, guildId: interaction.guildId}, interaction.botName);
 
         await interaction.editReply({ embeds: [{
             title: message,

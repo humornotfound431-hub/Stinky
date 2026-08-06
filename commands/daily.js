@@ -44,7 +44,7 @@ class Daily extends Command {
 
     static async claim(interaction, emote_map, colors) {
         await interaction.deferReply({flags: MessageFlags.Ephemeral});
-        const {success, message, streak, amount} = await check_daily(interaction.user.id, interaction.botName);
+        const {success, message, streak, amount} = await check_daily({guildId: interaction.guildId, discord_id: interaction.user.id}, interaction.botName);
 
         const embed = await getLeaderboard(emote_map, colors, interaction.guildId, interaction.botName);
         interaction.message.edit({

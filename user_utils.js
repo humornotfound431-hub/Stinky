@@ -1,10 +1,10 @@
 import User from './models/user.js';
 
-const get_user = async (discord_id) => {
+const get_user = async (userInfo) => {
     try {
         const user = await User.findOneAndUpdate(
-            { discord_id },
-            { $setOnInsert: { cloves: 1000 } },
+            { discord_id: userInfo.discord_id },
+            { $setOnInsert: { cloves: 1000, discord_id: userInfo.discord_id }, $addToSet: { guilds: userInfo.guildId } },
             { upsert: true, returnDocument: "after" }
         );
 
@@ -17,18 +17,41 @@ const get_user = async (discord_id) => {
     }
 };
 
-const add_currency = async (discord_id, amount, session = null) => {
+const add_currency = async (userInfo, amount, session = null) => {
     return await User.findOneAndUpdate(
-        { discord_id },
-        { $inc: { cloves: amount } },
+        { discord_id: userInfo.discord_id },
+        { $inc: { cloves: amount }, $addToSet: { guilds: userInfo.guildId } },
         { returnDocument: "after", upsert: true, session }
     );
 };
 
-const subtract_currency = async (discord_id, amount, session = null) => {
+const subtract_currency = async (userInfo, amount, session = null) => {
     return await User.findOneAndUpdate(
-        { discord_id },
-        [{ $set: { cloves: { $max:  [ { $subtract: ["$cloves", amount] }, 0] } } }],
+        { discord_id: userInfo.discord_id },
+        [
+            {
+                $set: {
+                    discord_id: userInfo.discord_id,
+                    cloves: {
+                        $max: [
+                            {
+                                $subtract: [
+                                    { $ifNull: ["$cloves", 0] },
+                                    amount
+                                ]
+                            },
+                            0
+                        ]
+                    },
+                    guilds: {
+                        $setUnion: [
+                            { $ifNull: ["$guilds", []] },
+                            [userInfo.guildId]
+                        ]
+                    }
+                }
+            }
+        ],
         {
             returnDocument: "after",
             upsert: true,
@@ -38,12 +61,12 @@ const subtract_currency = async (discord_id, amount, session = null) => {
     );
 };
 
-const get_daily_info = async (discord_id, session = null) => {
+const get_daily_info = async (userInfo, session = null) => {
     const daily_info = await User.findOneAndUpdate(
-        { discord_id },
-        { $setOnInsert: { discord_id } },
+        { discord_id: userInfo.discord_id },
+        { $setOnInsert: { discord_id: userInfo.discord_id }, $addToSet: { guilds: userInfo.guildId } },
         {
-            new: true,
+            returnDocument: "after",
             upsert: true,
             session
         }
@@ -52,7 +75,7 @@ const get_daily_info = async (discord_id, session = null) => {
     return daily_info;
 }
 
-const update_daily = async (discord_id, streak, session = null) => {
+const update_daily = async (userInfo, streak, session = null) => {
     const update = streak ? {
         $inc: { streak_daily: 1 },
         $set: { last_daily: new Date() }
@@ -64,8 +87,8 @@ const update_daily = async (discord_id, streak, session = null) => {
     };
 
     return await User.findOneAndUpdate(
-        { discord_id },
-        update,
+        { discord_id: userInfo.discord_id },
+        { ...update, $addToSet: { guilds: userInfo.guildId } },
         { session }
     );
 };

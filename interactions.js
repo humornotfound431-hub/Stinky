@@ -54,12 +54,12 @@ const get_jokes = async (count) => {
     return data;
 };
 
-const get_currency = async (id) => {
-    const user = await get_user(id);
+const get_currency = async (userInfo) => {
+    const user = await get_user(userInfo);
     return user.cloves;
 };
 
-const place_bet = async (amount, choice, channel, name, id, botName) => {
+const place_bet = async (amount, choice, channel, userInfo, botName) => {
     const numRegex = /^(?:[0-9]|[12][0-9]|3[0-6])$/;
     const colorRegex = /^(?:red|green|black)$/i;
     const parityRegex = /^(?:even|odd)$/i;
@@ -80,7 +80,7 @@ const place_bet = async (amount, choice, channel, name, id, botName) => {
         return {success: false, message: `Invalid bet ${emote}`};
     }
     
-    const user = await get_user(id);
+    const user = await get_user(userInfo);
 
     if (amount === "all") {
         amount = user.cloves;
@@ -151,7 +151,7 @@ const place_bet = async (amount, choice, channel, name, id, botName) => {
             }
         }, 30000);
 
-        roulette_state.bets.push([amount, choice, id, name]);
+        roulette_state.bets.push([amount, choice, userInfo, userInfo.name]);
 
         const number = Math.floor(Math.random() * 37);
         let color;
@@ -179,7 +179,7 @@ const place_bet = async (amount, choice, channel, name, id, botName) => {
         return { success: true, message: `Your bet was placed ${emote}`};
     }
 
-    roulette_state.bets.push([amount, choice, id, name]);
+    roulette_state.bets.push([amount, choice, userInfo, userInfo.name]);
 
     let emote = botName === "garlic" ? emote_map[botName].smug : emote_map[botName].JimothyCricketSmol;
     return { success: true, message: `Your bet was placed ${emote}`};
@@ -194,7 +194,7 @@ const play_slots = async (interaction, amount, botName) => {
             return {success: false, message: `Invalid options ${emote}`};
         }
 
-        const user = await get_user(interaction.user.id);
+        const user = await get_user({guildId: interaction.guildId, discord_id: interaction.user.id});
 
         if (amount === "all") {
             amount = user.cloves;
@@ -238,7 +238,7 @@ const play_slots = async (interaction, amount, botName) => {
             }
 
             const emote = botName === "garlic" ? emote_map[botName].crying : emote_map[botName].SadRheo;
-            await subtract_currency(interaction.user.id, changed);
+            await subtract_currency({guildId: interaction.guildId, discord_id: interaction.user.id}, changed);
             message = `Oof that has to hurt ${emote}`;
             changed = -changed;
         }
@@ -256,16 +256,16 @@ const play_slots = async (interaction, amount, botName) => {
                 const emote = botName === "garlic" ? emote_map[botName].smug : emote_map[botName].KAPPARHEO;
                 message = `3 in a row, how lucky ${emote}`;
             }
-            await add_currency(interaction.user.id, changed);
+            await add_currency({guildId: interaction.guildId, discord_id: interaction.user.id}, changed);
         }
         else if (results[0] === results[1] || results[1] === results[2] || results[2] === results[0]) {
             changed = Math.floor(changed * 0.5);
             const emote = botName === "garlic" ? emote_map[botName].heart_1 : emote_map[botName].HappyRheo;
             message = `Nice luck! Have some ${currencyName} as reward ${emote}`;
-            await add_currency(interaction.user.id, changed);
+            await add_currency({guildId: interaction.guildId, discord_id: interaction.user.id}, changed);
         }
         else {
-            await subtract_currency(interaction.user.id, changed);
+            await subtract_currency({guildId: interaction.guildId, discord_id: interaction.user.id}, changed);
             const smug = botName === "garlic" ? emote_map[botName].smug : emote_map[botName].KAPPARHEO;
             message = `99% gamblers quit before they win big ${smug}`;
             changed = -changed;
@@ -280,19 +280,19 @@ const play_slots = async (interaction, amount, botName) => {
     }
 };
 
-const donate_currency = async (user_id, target_id, user_name, target_name, amount, botName) => {
+const donate_currency = async (userInfo, targetInfo, amount, botName) => {
     const session = await mongoose.startSession();
     
     try {
         const currencyName = botName === "garlic" ? "cloves" : "batteries";
         session.startTransaction();
 
-        if (!user_id || !target_id || !user_name || !target_name || !amount) {
+        if (!userInfo.discord_id || !targetInfo.discord_id || !userInfo.name || !targetInfo.name || !amount) {
             let emote = botName === "garlic" ? emote_map[botName].peek : emote_map[botName].GoonerRheo;
             return {success: false, message: `Invalid options ${emote}`};
         }
 
-        const user_db = await get_user(user_id);
+        const user_db = await get_user(userInfo);
 
         if (amount === "all") {
             amount = user_db.cloves;
@@ -311,12 +311,12 @@ const donate_currency = async (user_id, target_id, user_name, target_name, amoun
             return {success: false, message: `You don't have enough ${currencyName} to donate ${emote}`};
         }
 
-        await add_currency(target_id, amount, session);
-        await subtract_currency(user_id, amount, session);
+        await add_currency(targetInfo, amount, session);
+        await subtract_currency(userInfo, amount, session);
 
         await session.commitTransaction();
         const emote = botName === "garlic" ? emote_map[botName].heart_1 : emote_map[botName].HappyRheo;
-        return {success: true, message: `${user_name} donated ${amount} ${currencyName} to ${target_name} ${emote}`};
+        return {success: true, message: `${userInfo.name} donated ${amount} ${currencyName} to ${targetInfo.name} ${emote}`};
     }
     catch (err) {
         await session.abortTransaction();
@@ -328,9 +328,9 @@ const donate_currency = async (user_id, target_id, user_name, target_name, amoun
     }
 };
 
-const check_daily = async (discord_id, botName) => {
+const check_daily = async (userInfo, botName) => {
     // When user uses the command, first we get last daily, if the diff between now and last daily is more than 24 hours, we update_daily with streak true, if not, then streak breaks
-    const daily_info = await get_daily_info(discord_id);
+    const daily_info = await get_daily_info(userInfo);
     const now = Date.now();
     const last_daily_time = (daily_info.last_daily !== null) ? daily_info.last_daily.getTime() : new Date(0).getTime();
     const difference = now - last_daily_time;
@@ -352,11 +352,11 @@ const check_daily = async (discord_id, botName) => {
         let streak;
 
         if (difference > day * 2) {
-            await update_daily(discord_id, false, session);
+            await update_daily(userInfo, false, session);
             streak = 0;
         }
         else {
-            await update_daily(discord_id, true, session);
+            await update_daily(userInfo, true, session);
             streak = daily_info.streak_daily + 1;
         }
 
@@ -368,7 +368,7 @@ const check_daily = async (discord_id, botName) => {
         else if (streak <= 28) amount = 800;
         else amount = 1000;
 
-        await add_currency(discord_id, amount, session);
+        await add_currency(userInfo, amount, session);
 
         await session.commitTransaction();
         let emote = botName === "garlic" ? emote_map[botName].smug : emote_map[botName].KAPPARHEO;
