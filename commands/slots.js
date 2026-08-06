@@ -8,7 +8,7 @@ class Slots extends Command {
         await interaction.deferReply();
         const amount = interaction.options.getString("amount").toLowerCase();
 
-        const {success, message, changed, results} = await play_slots(interaction, amount);
+        const {success, message, changed, results} = await play_slots(interaction, amount, interaction.botName);
 
         if (!success) {
             await interaction.editReply({ embeds: [{
