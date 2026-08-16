@@ -17,3 +17,16 @@ Unit tests -
 22 July:
     Add ability to customize name, pfp per server
     Update Games so that there is one per server
+
+Layout:
+    index.js
+    src:
+        <bots>
+        <activity server>
+    
+    activities:
+        1:
+            index.js
+            style.css
+            script.js
+        

@@ -1,4 +1,4 @@
-import { REST, Routes, SlashCommandBuilder, PermissionFlagsBits } from "discord.js";
+import { REST, Routes, SlashCommandBuilder, ApplicationCommandType, PermissionFlagsBits } from "discord.js";
 import { configDotenv } from 'dotenv';
 
 configDotenv();
@@ -96,6 +96,15 @@ const batteryCommands = [
 ].map(cmd => cmd.toJSON());
 
 const commands = [
+    {
+        "name": "launch",
+        "description": "Launch the activity",
+        "type": 4,
+        "handler": 2,
+        "integration_types": [0, 1],
+        "contexts": [0, 1, 2]
+    },
+
     new SlashCommandBuilder()
         .setName('ping')
         .setDescription('Replies with pong'),
@@ -191,7 +200,7 @@ const commands = [
         .setName("chess")
         .setDescription("Play chess")
 
-].map(cmd => cmd.toJSON());
+].map(cmd => cmd.toJSON ? cmd.toJSON() : cmd);
 
 const rest = new REST({ version: '10' }).setToken(process.env.GARLIC_TOKEN);
 const battery_rest = new REST({ version: '10' }).setToken(process.env.BATTERY_TOKEN);
@@ -200,7 +209,7 @@ const battery_rest = new REST({ version: '10' }).setToken(process.env.BATTERY_TO
     try {
         console.log('Registering commands...');
 
-        await rest.put(
+        const registered = await rest.put(
             Routes.applicationCommands(process.env.GARLIC_APP_ID),
             { body: commands }
         );
@@ -210,8 +219,9 @@ const battery_rest = new REST({ version: '10' }).setToken(process.env.BATTERY_TO
             { body: batteryCommands }
         );
 
-        console.log('Commands registered!');
-    } catch (err) {
+        console.log('Entry point in response:', registered.find(c => c.type === 4));
+    }
+    catch (err) {
         console.error(err);
     }
 })();

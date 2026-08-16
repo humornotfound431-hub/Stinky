@@ -1,7 +1,7 @@
 import { Chess } from "chess.js";
 import fs from "fs";
-import { get_user, add_currency, subtract_currency } from "../user_utils.js";
-import config from "../config.json" with { type: "json" };
+import { get_user, add_currency, subtract_currency } from "../../user_utils.js";
+import config from "../../config.json" with { type: "json" };
 import sharp from "sharp";
 
 const { emote_map } = config;

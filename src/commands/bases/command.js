@@ -1,5 +1,5 @@
 import commandChannelPerms from "../../cmdPerms.js";
-import config from '../../config.json' with { type: 'json' };
+import config from '../../../config.json' with { type: 'json' };
 
 const { emote_map, colors } = config;
 

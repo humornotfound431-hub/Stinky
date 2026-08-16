@@ -1,5 +1,5 @@
-import { get_user, add_currency, subtract_currency } from "../user_utils.js";
-import config from "../config.json" with { type: "json" };
+import { get_user, add_currency, subtract_currency } from "../../user_utils.js";
+import config from "../../config.json" with { type: "json" };
 
 const { emote_map } = config;
 

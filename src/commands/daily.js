@@ -1,5 +1,5 @@
 import Command from "./bases/command.js";
-import { get_sorted_streaks } from "../user_utils.js";
+import { get_sorted_streaks } from "../../user_utils.js";
 import { check_daily } from "../interactions.js";
 import { MessageFlags, ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
 

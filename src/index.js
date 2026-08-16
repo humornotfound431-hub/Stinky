@@ -6,7 +6,7 @@ import {
     MessageFlags
 } from 'discord.js';
 
-import User from './models/user.js';
+import User from '../models/user.js';
 
 import { Ping } from "./commands/ping.js";
 import { Daily } from './commands/daily.js';
@@ -21,8 +21,14 @@ import { Help } from './commands/help.js';
 import { IntermissionThread } from "./commands/interactionThread.js";
 
 import mongoose from 'mongoose';
-import config from './config.json' with { type: 'json' };
+import config from '../config.json' with { type: 'json' };
 import commandChannelPerms from './cmdPerms.js';
+
+import express from 'express';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import fetch from 'node-fetch';
+import { createProxyMiddleware } from 'http-proxy-middleware';
 
 configDotenv();
 const { emote_map, colors } = config;
@@ -33,6 +39,20 @@ mongoose.connect(process.env.MONGODB_URI)
     console.error(err);
     process.exit(1);
 });
+
+// WEB APP
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const app = express();
+
+// root activity page
+app.use(express.static(path.join(__dirname, 'web')));
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "web", "index.html"));
+});
+app.listen(process.env.PORT, () => console.log(`Server running on: ${process.env.PORT}`));
+
+// DISCORD BOTS
 
 const garlic_client = new Client({
     intents: [

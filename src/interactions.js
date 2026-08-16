@@ -1,8 +1,8 @@
 import { configDotenv } from 'dotenv';
 import mongoose from 'mongoose';
-import { add_currency, subtract_currency, get_user, update_daily, get_daily_info } from "./user_utils.js";
+import { add_currency, subtract_currency, get_user, update_daily, get_daily_info } from "../user_utils.js";
 import { MessageFlags, EmbedBuilder } from "discord.js";
-import config from './config.json' with { type: 'json' };
+import config from '../config.json' with { type: 'json' };
 import fs from "fs";
 
 const { emote_map, colors, images } = config;

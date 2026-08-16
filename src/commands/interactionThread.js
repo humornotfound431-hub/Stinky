@@ -1,5 +1,5 @@
 import Command from "./bases/command.js";
-import config from '../config.json' with { type: 'json' };
+import config from '../../config.json' with { type: 'json' };
 import { MessageFlags } from "discord.js";
 
 const { channels } = config;
